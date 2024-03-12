@@ -153,6 +153,8 @@ class MyWindow(aio.Ui_MainWindow):
 
         sourcedir = QFileDialog.getExistingDirectory(MainWindow, "选择源文件夹")
         outputdir = QFileDialog.getExistingDirectory(MainWindow, '选择输出文件夹')
+        print(f"sourcedir: {sourcedir}")
+        print(f"outputdir: {outputdir}")
 
         if len(sourcedir) == 0 or len(outputdir) == 0:
             print(f"文件夹地址为空")
@@ -189,6 +191,5 @@ if __name__ == '__main__':
     sys.stdout.write = ui.write_console
     MainWindow.show()
     # 示例输出
-    print("Hello, this is a console output.")
-    print("You can use this console to output messages.")
+    print("JSH Toolkit")
     sys.exit(app.exec_())
