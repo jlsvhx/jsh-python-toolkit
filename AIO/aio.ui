@@ -58,7 +58,7 @@ background:rgb(0, 0, 0);
         <item>
          <widget class="QPushButton" name="pushButton">
           <property name="styleSheet">
-           <string notr="true">background:rgb(202, 202, 202)</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>检查损坏图片</string>
@@ -68,7 +68,7 @@ background:rgb(0, 0, 0);
         <item>
          <widget class="QPushButton" name="pushButton_3">
           <property name="styleSheet">
-           <string notr="true">background:rgb(202, 202, 202)</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>压缩图片</string>
@@ -78,7 +78,7 @@ background:rgb(0, 0, 0);
         <item>
          <widget class="QPushButton" name="pushButton_6">
           <property name="styleSheet">
-           <string notr="true">background:rgb(202, 202, 202)</string>
+           <string notr="true"/>
           </property>
           <property name="text">
            <string>计算CRC32</string>
@@ -131,7 +131,11 @@ background:rgb(0, 0, 0);
          <number>2</number>
         </property>
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">

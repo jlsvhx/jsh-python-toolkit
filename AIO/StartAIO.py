@@ -1,6 +1,7 @@
 import os.path
 import sys
 
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir
 from PyQt5.QtGui import QFont, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
@@ -101,6 +102,9 @@ class MyWindow(aio.Ui_MainWindow):
         # 创建表视图
         # self.table_view = QTableView()
         self.tableView.setModel(self.model)
+        # self.tableView.verticalHeader().setDefaultAlignment(Qt.AlignHCenter)
+        # self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        # self.tableView.verticalHeader().setDefaultSectionSize(20)  # height 为行高度
         # self.layout.addWidget(self.table_view)
 
         # 设置状态栏
@@ -183,6 +187,7 @@ class MyWindow(aio.Ui_MainWindow):
 
 
 if __name__ == '__main__':
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
 
