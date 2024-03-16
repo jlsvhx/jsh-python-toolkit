@@ -164,7 +164,7 @@ def check_broken_images_in_folder_mu(folder_path):
                     # 如果需要，可以在这里处理完整的图像
                     pass
 
-    print("检查损坏图片 done")
+    print("检查损坏图片 完成")
 
 
 def delete_corrupted_images(file_path):
@@ -320,4 +320,4 @@ def calculate_crc32_in_folder_mu(main_directory, thread_count=1):
         for folders in folders_to_process:
             executor.map(process_sfv_files_in_directory, folders)
 
-    print("计算CRC32 done")
+    print("计算CRC32 完成")
