@@ -132,7 +132,7 @@ class MyWindow(aio.Ui_MainWindow):
         # 双击打开的处理方法
         file_path = self.model.filePath(index)
         if not self.model.isDir(index):  # 确保双击的是文件而不是文件夹
-            print(f"Opening file: {file_path}")
+            # print(f"Opening file: {file_path}")
             # 使用系统默认的程序打开文件
             QDesktopServices.openUrl(QUrl.fromLocalFile(file_path))
 
