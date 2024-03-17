@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeader
 import aio
 
 from jshtoolkit.sub2main import main as sub2main
-from jshtoolkit.checkFile import check_broken_images_in_folder_mu, calculate_crc32_in_folder_mu
+from jshtoolkit.checkFile import check_broken_images_in_folder_mu, calculate_crc32_in_folder_mu,open_current_sfv
 from jshtoolkit.png2webpV1 import png2webpV1
 from jshtoolkit.delblankdir import delBlankDir
 
@@ -116,11 +116,12 @@ class MyWindow(aio.Ui_MainWindow):
         # self.select_button.clicked.connect(self.select_path)
         # self.path_label = QLabel("当前路径：")
 
-        self.pushButton_4.clicked.connect(lambda: self.callfunction(sub2main))
-        self.pushButton_6.clicked.connect(lambda: self.callfunction(calculate_crc32_in_folder_mu))
-        self.pushButton.clicked.connect(lambda: self.callfunction(check_broken_images_in_folder_mu))
+        self.pushButton_4.clicked.connect(lambda: self.callfunction_with_confirm(sub2main))
+        self.pushButton_6.clicked.connect(lambda: self.callfunction_with_confirm(calculate_crc32_in_folder_mu))
+        self.pushButton.clicked.connect(lambda: self.callfunction_with_confirm(check_broken_images_in_folder_mu))
         self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(png2webpV1))
-        self.pushButton_5.clicked.connect(lambda: self.callfunction(delBlankDir))
+        self.pushButton_5.clicked.connect(lambda: self.callfunction_with_confirm(delBlankDir))
+        self.pushButton_7.clicked.connect(lambda: self.callfunction_without_confirm(open_current_sfv))
 
         self.treeView.customContextMenuRequested.connect(self.showContextMenu)
         self.createContextMenu()
@@ -164,8 +165,19 @@ class MyWindow(aio.Ui_MainWindow):
 
         self.setStatusBarMessage("Calling function end")
 
+    def callfunction_without_confirm(self, function):
 
-    def callfunction(self, function):
+        selected_index = self.treeView.selectionModel().currentIndex()
+        selected_file_path = self.model.filePath(selected_index)
+        if os.path.isdir(selected_file_path):
+            msg = f"selected directory: {selected_file_path}"
+            print(msg)
+            print('Proceeding...')
+            function(selected_file_path)
+        else:
+            print(f"{selected_file_path} is not a directory")
+
+    def callfunction_with_confirm(self, function):
 
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)

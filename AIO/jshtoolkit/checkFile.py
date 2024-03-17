@@ -7,6 +7,8 @@ import cv2  # py-opencv
 import sqlite3
 import zlib
 from PIL import Image
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QDesktopServices
 from pillow_heif import register_heif_opener  # pip3 install pillow-heif
 import threading
 
@@ -334,3 +336,14 @@ def calculate_crc32_in_folder_mu(main_directory, thread_count=1):
             executor.map(process_sfv_files_in_directory, folders)
 
     print("计算CRC32 完成")
+
+def open_current_sfv(dir):
+    if os.path.isdir(dir):
+        dirname = os.path.basename(dir)
+        sfvname = dirname+'.sfv'
+        sfvpath = os.path.join(dir, sfvname)
+        if os.path.exists(sfvpath):
+            QDesktopServices.openUrl(QUrl.fromLocalFile(sfvpath))
+
+if __name__ == '__main__':
+    open_current_sfv(r'D:\0_Immortal\IMMO-05 MusicEtc\常规格式 音乐 20220721')
