@@ -337,13 +337,25 @@ def calculate_crc32_in_folder_mu(main_directory, thread_count=1):
 
     print("计算CRC32 完成")
 
+
 def open_current_sfv(dir):
     if os.path.isdir(dir):
         dirname = os.path.basename(dir)
-        sfvname = dirname+'.sfv'
+        sfvname = dirname + '.sfv'
         sfvpath = os.path.join(dir, sfvname)
         if os.path.exists(sfvpath):
             QDesktopServices.openUrl(QUrl.fromLocalFile(sfvpath))
+
+
+def is_svf_exist(dir):
+    if os.path.isdir(dir):
+        dirname = os.path.basename(dir)
+        sfvname = dirname + '.sfv'
+        sfvpath = os.path.join(dir, sfvname)
+        if os.path.exists(sfvpath):
+            return True
+    return False
+
 
 if __name__ == '__main__':
     open_current_sfv(r'D:\0_Immortal\IMMO-05 MusicEtc\常规格式 音乐 20220721')

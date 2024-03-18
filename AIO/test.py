@@ -1,41 +1,40 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeView, QFileSystemModel
-from PyQt5.QtCore import QDir
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QProgressBar
+from PyQt5.QtCore import QTimer
 
-
-class MainWindow(QMainWindow):
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(100, 100, 600, 400)
+        layout = QVBoxLayout()
 
-        # 创建 QTreeView 和 QFileSystemModel
-        self.treeView = QTreeView(self)
-        self.model = QFileSystemModel(self)
+        self.progress_bar = QProgressBar(self)
+        layout.addWidget(self.progress_bar)
 
-        # 允许显示隐藏文件夹
-        self.model.setFilter(QDir.AllEntries | QDir.Hidden)
+        self.start_button = QPushButton('Start', self)
+        self.start_button.clicked.connect(self.startProgress)
+        layout.addWidget(self.start_button)
 
-        # 设置根路径为当前目录
-        self.model.setRootPath(QDir.rootPath())
+        self.setLayout(layout)
+        self.setWindowTitle('PyQt Progress Bar Example')
 
-        # 获取目录列表
-        rootIndex = self.model.index(QDir.rootPath())
-        rowCount = self.model.rowCount(rootIndex)
-        for i in range(rowCount):
-            if self.model.fileName(rootIndex.child(i)) not in ['.', '..']:
-                self.treeView.setModel(self.model)
+    def startProgress(self):
+        self.progress = 0
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.updateProgress)
+        self.timer.start(100)  # 更新进度条的时间间隔（毫秒）
 
-        # 设置主窗口的中心部件
-        self.setCentralWidget(self.treeView)
-
-        self.show()
-
+    def updateProgress(self):
+        self.progress += 0.5
+        self.progress_bar.setValue(self.progress)
+        if self.progress >= 100:
+            self.timer.stop()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    mainWindow = MainWindow()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec_())

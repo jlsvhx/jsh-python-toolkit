@@ -3,14 +3,17 @@ import sys
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir
-from PyQt5.QtGui import QFont, QDesktopServices
+from PyQt5.QtGui import QFont, QDesktopServices, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
     QStatusBar, QMenu, QAction
 
 import aio
 
 from jshtoolkit.sub2main import main as sub2main
-from jshtoolkit.checkFile import check_broken_images_in_folder_mu, calculate_crc32_in_folder_mu,open_current_sfv
+from jshtoolkit.checkFile import (check_broken_images_in_folder_mu,
+                                  calculate_crc32_in_folder_mu,
+                                  open_current_sfv,
+                                  is_svf_exist)
 from jshtoolkit.png2webpV1 import png2webpV1
 from jshtoolkit.delblankdir import delBlankDir
 
@@ -35,9 +38,15 @@ class MyWindow(aio.Ui_MainWindow):
             self.current_path = selected_path
             self.updateTableView()
 
+        if is_svf_exist(selected_path):
+            self.pushButton_7.setEnabled(True)
+        else:
+            self.pushButton_7.setEnabled(False)
+
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)
         self.lineEdit.setText(f"当前路径：{selected_file_path}")
+
 
     def expandAndCollapse(self, index):
         # 切换项的展开状态
@@ -116,12 +125,12 @@ class MyWindow(aio.Ui_MainWindow):
         # self.select_button.clicked.connect(self.select_path)
         # self.path_label = QLabel("当前路径：")
 
-        self.pushButton_4.clicked.connect(lambda: self.callfunction_with_confirm(sub2main))
-        self.pushButton_6.clicked.connect(lambda: self.callfunction_with_confirm(calculate_crc32_in_folder_mu))
-        self.pushButton.clicked.connect(lambda: self.callfunction_with_confirm(check_broken_images_in_folder_mu))
+        self.pushButton_4.clicked.connect(lambda: self.call_function_confirm(sub2main))
+        self.pushButton_6.clicked.connect(lambda: self.call_function_confirm(calculate_crc32_in_folder_mu))
+        self.pushButton.clicked.connect(lambda: self.call_function_confirm(check_broken_images_in_folder_mu))
         self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(png2webpV1))
-        self.pushButton_5.clicked.connect(lambda: self.callfunction_with_confirm(delBlankDir))
-        self.pushButton_7.clicked.connect(lambda: self.callfunction_without_confirm(open_current_sfv))
+        self.pushButton_5.clicked.connect(lambda: self.call_function_confirm(delBlankDir))
+        self.pushButton_7.clicked.connect(lambda: self.call_function_no_confirm(open_current_sfv))
 
         self.treeView.customContextMenuRequested.connect(self.showContextMenu)
         self.createContextMenu()
@@ -165,7 +174,7 @@ class MyWindow(aio.Ui_MainWindow):
 
         self.setStatusBarMessage("Calling function end")
 
-    def callfunction_without_confirm(self, function):
+    def call_function_no_confirm(self, function):
 
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)
@@ -173,11 +182,11 @@ class MyWindow(aio.Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            function(selected_file_path)
+            function(selected_file_path, self.progressBar)
         else:
             print(f"{selected_file_path} is not a directory")
 
-    def callfunction_with_confirm(self, function):
+    def call_function_confirm(self, function):
 
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)
