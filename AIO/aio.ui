@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>635</width>
-    <height>463</height>
+    <width>1006</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,6 +55,13 @@ background:rgb(0, 0, 0);
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>图片处理—&gt;</string>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QPushButton" name="pushButton">
           <property name="styleSheet">
@@ -198,7 +205,7 @@ background:rgb(0, 0, 0);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>635</width>
+     <width>1006</width>
      <height>22</height>
     </rect>
    </property>

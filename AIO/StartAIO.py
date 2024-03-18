@@ -2,10 +2,10 @@ import os.path
 import sys
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir
+from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir, QTime
 from PyQt5.QtGui import QFont, QDesktopServices, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
-    QStatusBar, QMenu, QAction
+    QStatusBar, QMenu, QAction, QLCDNumber
 
 import aio
 
@@ -132,11 +132,22 @@ class MyWindow(aio.Ui_MainWindow):
         self.pushButton_5.clicked.connect(lambda: self.call_function_confirm(delBlankDir))
         self.pushButton_7.clicked.connect(lambda: self.call_function_no_confirm(open_current_sfv))
 
+        self.lcdNumber.setDigitCount(8)  # 设置显示的位数为 8 位
+        self.lcdNumber.setSegmentStyle(QLCDNumber.Filled)  # 设置填充样式
+        self.lcdNumber.timer = QTimer(self.lcdNumber)  # 创建一个定时器
+        self.lcdNumber.timer.timeout.connect(self.showTime)  # 定时器超时时连接到显示时间的槽函数
+        self.lcdNumber.timer.start(1000)  # 设置定时器间隔为 1000 毫秒（1 秒）
+
         self.treeView.customContextMenuRequested.connect(self.showContextMenu)
         self.createContextMenu()
 
         # 设置双击事件连接
         self.tableView.doubleClicked.connect(self.on_double_click)
+
+    def showTime(self):
+        time = QTime.currentTime()  # 获取当前时间
+        text = time.toString('hh:mm:ss')  # 格式化时间为字符串
+        self.lcdNumber.display(text)  # 在 QLCDNumber 上显示时间
 
     def on_double_click(self, index):
         # 双击打开的处理方法
@@ -178,11 +189,12 @@ class MyWindow(aio.Ui_MainWindow):
 
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)
+        self.setStatusBarMessage("Calling function")
         if os.path.isdir(selected_file_path):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            function(selected_file_path, self.progressBar)
+            function(selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
 
