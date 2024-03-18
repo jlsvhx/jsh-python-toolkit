@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1006</width>
+    <width>1137</width>
     <height>483</height>
    </rect>
   </property>
@@ -57,6 +57,12 @@ background:rgb(0, 0, 0);
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>图片处理—&gt;</string>
           </property>
@@ -64,6 +70,12 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -74,6 +86,12 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_3">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -84,6 +102,12 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_6">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -94,6 +118,12 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_4">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -104,6 +134,12 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_5">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>删除空文件夹</string>
           </property>
@@ -111,6 +147,11 @@ background:rgb(0, 0, 0);
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_7">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>打开当前sfv</string>
           </property>
@@ -139,6 +180,12 @@ background:rgb(0, 0, 0);
         </property>
         <item>
          <widget class="QLineEdit" name="lineEdit">
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -182,6 +229,12 @@ background:rgb(0, 0, 0);
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <family>Adobe Devanagari</family>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
           <property name="readOnly">
            <bool>true</bool>
           </property>
@@ -205,8 +258,8 @@ background:rgb(0, 0, 0);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1006</width>
-     <height>22</height>
+     <width>1137</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

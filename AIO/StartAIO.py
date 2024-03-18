@@ -47,6 +47,8 @@ class MyWindow(aio.Ui_MainWindow):
         selected_file_path = self.model.filePath(selected_index)
         self.lineEdit.setText(f"当前路径：{selected_file_path}")
 
+        self.setStatusBarMessage(os.path.basename(selected_path))
+
 
     def expandAndCollapse(self, index):
         # 切换项的展开状态
