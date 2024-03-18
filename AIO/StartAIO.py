@@ -81,7 +81,7 @@ class MyWindow(aio.Ui_MainWindow):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
-        MainWindow.resize(1920, 1080)
+        MainWindow.resize(1200, 600)
         # 创建文件系统模型
         self.model = QFileSystemModel()
         self.model.setRootPath("")  # 设置根路径为空，显示整个文件系统树
