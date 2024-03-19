@@ -123,18 +123,28 @@ def check_broken_images_in_folder_mu(folder_path):
             img = Image.open(image_path)
             img.verify()
             img.close()
+
+            # Image manipulation is mandatory to detect few defects
+            img = Image.open(filename)  # open the image file
+            # alternative (removed) version, decode/recode:
+            # f = cStringIO.StringIO()
+            # f = io.BytesIO()
+            # img.save(f, "BMP")
+            # f.close()
+            img.transpose(Image.FLIP_LEFT_RIGHT)
+            img.close()
             return image_path, False  # 图像未损坏
         except Exception as e:
             pass
 
-        try:
-            img = cv2.imread(image_path)
-            if img is None:
-                pass
-            else:
-                return image_path, False  # 图像未损坏
-        except Exception as e:
-            pass
+        # try:
+        #     img = cv2.imread(image_path)
+        #     if img is None:
+        #         pass
+        #     else:
+        #         return image_path, False  # 图像未损坏
+        # except Exception as e:
+        #     pass
 
         return image_path, True  # 图像损坏
 
