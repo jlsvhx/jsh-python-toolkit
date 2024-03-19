@@ -16,17 +16,18 @@ import sys
 import os
 import time
 import PIL
-from PIL import Image as IMAGEP
-# from wand.image import Image as ImageW
+from PIL import Image as ImageP
+from wand.image import Image as ImageW
 import PyPDF2
 import csv
 import ffmpeg
 import argparse
 from subprocess import Popen, PIPE
-from pillow_heif import register_heif_opener  # pip3 install pillow-heif
+from pillow_heif import register_heif_opener,register_avif_opener  # pip3 install pillow-heif
 import threading
 
 register_heif_opener()
+register_avif_opener()
 LICENSE = "Copyright (C) 2018  Fabiano Tarlao.\nThis program comes with ABSOLUTELY NO WARRANTY.\n" \
           "This is free software, and you are welcome to redistribute it under GPL3 license conditions"
 
@@ -37,7 +38,7 @@ UPDATE_MB_INTERVAL = 500  # minimum MBytes of data between output log/messages
 # ..BUT, you have to double check Pillow, Imagemagick or FFmpeg to support that format/container
 # please in the case I miss important extensions, send a pull request or create an Issue
 
-PIL_EXTENSIONS = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'gif', 'pcd', 'tif', 'tiff', 'j2k', 'j2p', 'j2x', 'webp', 'heif', 'heic']
+PIL_EXTENSIONS = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'gif', 'pcd', 'tif', 'tiff', 'j2k', 'j2p', 'j2x', 'webp', 'heif', 'heic', 'avif']
 PIL_EXTRA_EXTENSIONS = ['eps', 'ico', 'im', 'pcx', 'ppm', 'sgi', 'spider', 'xbm', 'tga']
 
 MAGICK_EXTENSIONS = ['psd', 'xcf']
@@ -54,7 +55,7 @@ CONFIG = None
 
 import textwrap as _textwrap
 
-IMAGEP.MAX_IMAGE_PIXELS = None  # 禁用解压缩炸弹限制
+ImageP.MAX_IMAGE_PIXELS = None  # 禁用解压缩炸弹限制
 
 class MultilineFormatter(argparse.HelpFormatter):
     def _fill_text(self, text, width, indent):
@@ -150,12 +151,12 @@ def setup(configuration):
 
 def pil_check(filename):
     print(filename)
-    img = IMAGEP.open(filename)  # open the image file
+    img = ImageP.open(filename)  # open the image file
     img.verify()  # verify that it is a good image, without decoding it.. quite fast
     img.close()
 
     # Image manipulation is mandatory to detect few defects
-    img = IMAGEP.open(filename)  # open the image file
+    img = ImageP.open(filename)  # open the image file
     # alternative (removed) version, decode/recode:
     # f = cStringIO.StringIO()
     # f = io.BytesIO()
@@ -165,15 +166,15 @@ def pil_check(filename):
     img.close()
 
 
-# def magick_check(filename, flip=True):
-#     # very useful for xcf, psd and aslo supports pdf
-#     img = ImageW(filename=filename)
-#     if flip:
-#         temp = img.flip
-#     else:
-#         temp = img.make_blob(format='bmp')
-#     img.close()
-#     return temp
+def magick_check(filename, flip=True):
+    # very useful for xcf, psd and aslo supports pdf
+    img = ImageW(filename=filename)
+    if flip:
+        temp = img.flip
+    else:
+        temp = img.make_blob(format='bmp')
+    img.close()
+    return temp
 
 
 def magick_identify_check(filename):
@@ -186,13 +187,13 @@ def magick_identify_check(filename):
     return out
 
 
-# def pypdf_check(filename):
-#     # PDF format
-#     # Check with specific library
-#     pdfobj = PyPDF2.PdfFileReader(open(filename, "rb"))
-#     pdfobj.getDocumentInfo()
-#     # Check with imagemagick
-#     magick_check(filename, False)
+def pypdf_check(filename):
+    # PDF format
+    # Check with specific library
+    pdfobj = PyPDF2.PdfFileReader(open(filename, "rb"))
+    pdfobj.getDocumentInfo()
+    # Check with imagemagick
+    magick_check(filename, False)
 
 
 def check_zeros(filename, length_seq_threshold=None):
@@ -294,7 +295,7 @@ def is_pil_simd():
     return 'post' in PIL.__version__
 
 
-def check_file(filename, error_detect='default', strict_level=1, zero_detect=0, ffmpeg_threads=0):
+def check_file(filename, error_detect='default', strict_level=0, zero_detect=0, ffmpeg_threads=0):
     if sys.version_info[0] < 3:
         filename = filename.decode('utf8')
 
@@ -314,17 +315,17 @@ def check_file(filename, error_detect='default', strict_level=1, zero_detect=0, 
             if strict_level in [0, 2]:
                 magick_identify_check(filename)
 
-        # if file_ext in PDF_EXTENSIONS:
-        #     if strict_level in [1, 2]:
-        #         pypdf_check(filename)
-        #     if strict_level in [0, 2]:
-        #         magick_identify_check(filename)
+        if file_ext in PDF_EXTENSIONS:
+            if strict_level in [1, 2]:
+                pypdf_check(filename)
+            if strict_level in [0, 2]:
+                magick_identify_check(filename)
 
-        # if file_ext in MAGICK_EXTENSIONS:
-        #     if strict_level in [1, 2]:
-        #         magick_check(filename)
-        #     if strict_level in [0, 2]:
-        #         magick_identify_check(filename)
+        if file_ext in MAGICK_EXTENSIONS:
+            if strict_level in [1, 2]:
+                magick_check(filename)
+            if strict_level in [0, 2]:
+                magick_identify_check(filename)
 
         if file_ext in VIDEO_EXTENSIONS:
             ffmpeg_check(filename, error_detect=error_detect, threads=ffmpeg_threads)
@@ -454,4 +455,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print(check_file('pic/2.heif'))
