@@ -9,13 +9,13 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeader
 
 import aio
 
-from jshtoolkit.sub2main import main as sub2main
-from jshtoolkit.checkFile import (check_broken_images_in_folder_mu,
-                                  calculate_crc32_in_folder_mu,
-                                  open_current_sfv,
-                                  is_svf_exist)
-from jshtoolkit.png2webpV1 import png2webpV1
-from jshtoolkit.delblankdir import delBlankDir
+from jfunction.sub2main import main as sub2main
+from jfunction.checkFile import (check_broken_images_in_folder_mu,
+                                 calculate_crc32_in_folder_mu,
+                                 open_current_sfv,
+                                 is_svf_exist)
+from jfunction.png2webpV1 import png2webpV1
+from jfunction.delblankdir import delBlankDir
 
 class MyWindow(aio.Ui_MainWindow):
 
