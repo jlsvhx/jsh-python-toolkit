@@ -366,6 +366,39 @@ def is_svf_exist(dir):
             return True
     return False
 
+def process_image2(image_path):
+
+    try:
+        img = Image.open(image_path)
+        img.verify()
+        img.close()
+        return image_path, False  # 图像未损坏
+    except Exception as e:
+        pass
+
+    # try:
+    #     img = cv2.imread(image_path)
+    #     if img is None:
+    #         pass
+    #     else:
+    #         return image_path, False  # 图像未损坏
+    # except Exception as e:
+    #     pass
+
+    # try:
+    #     # 尝试读取图像文件
+    #     with open(image_path, 'rb') as f:
+    #         im = imageio.v3.imread(f)
+    #     return image_path, False  # 图像文件正常
+    # except Exception as e:
+    #     pass
+
+    return image_path, True  # 图像损坏
 
 if __name__ == '__main__':
-    check_broken_images_in_folder_mu('pic')
+    # check_broken_images_in_folder_mu('pic')
+    # print(process_image2('pic/3.webp'))
+    img = Image.open('pic/3.webp')
+    img.verify()
+    img.close()
+
