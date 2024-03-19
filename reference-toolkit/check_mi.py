@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# https://github.com/ftarlao/check-media-integrity
+# ffmpeg-python==0.1.17
+# future==0.17.1
+# Pillow-SIMD==5.3.0.post0
+# PyPDF2==1.26.0
+# Wand==0.4.5
+
 import warnings
 from queue import Empty
 from multiprocessing import Pool, Queue, Process
