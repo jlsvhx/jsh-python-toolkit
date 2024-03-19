@@ -121,9 +121,9 @@ def arg_parser():
                              '2 applies both 0+1 checks',
                         dest='strict_level', default=1)
     parser.add_argument('-t', '--threads', metavar='T', type=int,
-                        help='number of parallel threads used for speedup, default is one. Single file execution does'
+                        help='number of parallel threads used for speedup, default is ten. Single file execution does'
                              'not take advantage of the thread option',
-                        dest='threads', default=1)
+                        dest='threads', default=10)
     parser.add_argument('-T', '--timeout', metavar='K', type=int,
                         help='number of seconds to wait for new performed checks in queue, default is 120 sec, you need'
                              ' to raise the default when working with video files (usually) bigger than few GBytes',

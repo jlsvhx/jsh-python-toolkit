@@ -7,7 +7,7 @@ import cv2  # py-opencv
 import sqlite3
 import zlib
 
-import imageio
+# import imageio
 from PIL import Image
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QDesktopServices
@@ -133,14 +133,6 @@ def check_broken_images_in_folder_mu(folder_path):
                 pass
             else:
                 return image_path, False  # 图像未损坏
-        except Exception as e:
-            pass
-
-        try:
-            # 尝试读取图像文件
-            with open(image_path, 'rb') as f:
-                im = imageio.v3.imread(f)
-            return image_path, False  # 图像文件正常
         except Exception as e:
             pass
 
