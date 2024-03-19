@@ -397,7 +397,7 @@ def process_image2(image_path):
 
 if __name__ == '__main__':
     # check_broken_images_in_folder_mu('pic')
-    # print(process_image2('pic/3.webp'))
+    # print(process_image2('pic/3.jpg'))
     img = Image.open('pic/3.webp')
     img.verify()
     img.close()

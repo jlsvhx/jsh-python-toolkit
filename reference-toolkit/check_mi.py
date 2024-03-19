@@ -16,14 +16,17 @@ import sys
 import os
 import time
 import PIL
-from PIL import Image as ImageP
+from PIL import Image as IMAGEP
 # from wand.image import Image as ImageW
 import PyPDF2
 import csv
 import ffmpeg
 import argparse
 from subprocess import Popen, PIPE
+from pillow_heif import register_heif_opener  # pip3 install pillow-heif
+import threading
 
+register_heif_opener()
 LICENSE = "Copyright (C) 2018  Fabiano Tarlao.\nThis program comes with ABSOLUTELY NO WARRANTY.\n" \
           "This is free software, and you are welcome to redistribute it under GPL3 license conditions"
 
@@ -34,7 +37,7 @@ UPDATE_MB_INTERVAL = 500  # minimum MBytes of data between output log/messages
 # ..BUT, you have to double check Pillow, Imagemagick or FFmpeg to support that format/container
 # please in the case I miss important extensions, send a pull request or create an Issue
 
-PIL_EXTENSIONS = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'gif', 'pcd', 'tif', 'tiff', 'j2k', 'j2p', 'j2x', 'webp']
+PIL_EXTENSIONS = ['jpg', 'jpeg', 'jpe', 'png', 'bmp', 'gif', 'pcd', 'tif', 'tiff', 'j2k', 'j2p', 'j2x', 'webp', 'heif', 'heic']
 PIL_EXTRA_EXTENSIONS = ['eps', 'ico', 'im', 'pcx', 'ppm', 'sgi', 'spider', 'xbm', 'tga']
 
 MAGICK_EXTENSIONS = ['psd', 'xcf']
@@ -51,6 +54,7 @@ CONFIG = None
 
 import textwrap as _textwrap
 
+IMAGEP.MAX_IMAGE_PIXELS = None  # 禁用解压缩炸弹限制
 
 class MultilineFormatter(argparse.HelpFormatter):
     def _fill_text(self, text, width, indent):
@@ -146,12 +150,12 @@ def setup(configuration):
 
 def pil_check(filename):
     print(filename)
-    img = ImageP.open(filename)  # open the image file
+    img = IMAGEP.open(filename)  # open the image file
     img.verify()  # verify that it is a good image, without decoding it.. quite fast
     img.close()
 
     # Image manipulation is mandatory to detect few defects
-    img = ImageP.open(filename)  # open the image file
+    img = IMAGEP.open(filename)  # open the image file
     # alternative (removed) version, decode/recode:
     # f = cStringIO.StringIO()
     # f = io.BytesIO()
@@ -450,7 +454,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # print(check_file('3.webp'))
-    img = ImageP.open('pic/3.webp')  # open the image file
-    img.verify()  # verify that it is a good image, without decoding it.. quite fast
-    img.close()
+    main()
