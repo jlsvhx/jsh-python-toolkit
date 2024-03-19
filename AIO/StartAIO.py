@@ -1,8 +1,10 @@
 import os.path
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from datetime import time
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir, QTime
+from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir, QTime, QObject, pyqtSignal, QThread
 from PyQt5.QtGui import QFont, QDesktopServices, QColor
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
     QStatusBar, QMenu, QAction, QLCDNumber
@@ -16,6 +18,20 @@ from jfunction.checkFile import (check_broken_images_in_folder_mu,
                                  is_svf_exist)
 from jfunction.png2webpV1 import png2webpV1
 from jfunction.delblankdir import delBlankDir
+
+
+class Worker(QObject):
+    finished = pyqtSignal()
+
+    def __init__(self, function, *args, **kwargs):
+        super().__init__()
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+
+    def run(self):
+        self.function(*self.args, **self.kwargs)
+        self.finished.emit()
 
 class MyWindow(aio.Ui_MainWindow):
 
@@ -172,9 +188,34 @@ class MyWindow(aio.Ui_MainWindow):
         # 更新状态栏消息
         self.statusBar.showMessage(message)
 
-    def callfunctionWithoutSelect(self, function):
-        self.setStatusBarMessage("Calling function start")
+    def call_function(self, function):
 
+        selected_index = self.treeView.selectionModel().currentIndex()
+        selected_file_path = self.model.filePath(selected_index)
+        if os.path.isdir(selected_file_path):
+            msg = f"selected directory: {selected_file_path}"
+            print(msg)
+            reply = QMessageBox.question(MainWindow, 'Confirmation', 'Are you sure to proceed ' + msg,
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                print('Proceeding...')
+                # function(selected_file_path)
+                worker = Worker(function, selected_file_path)
+                thread = QThread()
+                worker.moveToThread(thread)
+                thread.started.connect(worker.run)
+                worker.finished.connect(thread.quit)
+                worker.finished.connect(worker.deleteLater)
+                thread.finished.connect(thread.deleteLater)
+                thread.start()
+            else:
+                print('Cancelled')
+        else:
+            print(f"{selected_file_path} is not a directory")
+
+
+
+    def callfunctionWithoutSelect(self, function):
         sourcedir = QFileDialog.getExistingDirectory(MainWindow, "选择源文件夹")
         outputdir = QFileDialog.getExistingDirectory(MainWindow, '选择输出文件夹')
         print(f"sourcedir: {sourcedir}")
@@ -183,9 +224,11 @@ class MyWindow(aio.Ui_MainWindow):
         if len(sourcedir) == 0 or len(outputdir) == 0:
             print(f"文件夹地址为空")
         else:
-            function(sourcedir, outputdir)
+            # function(sourcedir, outputdir)
+            with ThreadPoolExecutor() as executor:
+                executor.submit(function, sourcedir, outputdir)
 
-        self.setStatusBarMessage("Calling function end")
+
 
     def call_function_no_confirm(self, function):
 
@@ -196,7 +239,9 @@ class MyWindow(aio.Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            function(selected_file_path)
+            # function(selected_file_path)
+            with ThreadPoolExecutor() as executor:
+                executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
 
@@ -211,7 +256,9 @@ class MyWindow(aio.Ui_MainWindow):
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
-                function(selected_file_path)
+                # function(selected_file_path)
+                with ThreadPoolExecutor() as executor:
+                    executor.submit(function, selected_file_path)
             else:
                 print('Cancelled')
         else:

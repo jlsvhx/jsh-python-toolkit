@@ -302,7 +302,7 @@ def is_pil_simd():
     return 'post' in PIL.__version__
 
 
-def check_file(filename, error_detect='default', strict_level=0, zero_detect=0, ffmpeg_threads=0):
+def check_file(filename, error_detect='default', strict_level=1, zero_detect=0, ffmpeg_threads=0):
     if sys.version_info[0] < 3:
         filename = filename.decode('utf8')
 
@@ -422,7 +422,7 @@ def main():
         if not CONFIG.is_recurse:
             break  # we only check the root folder
 
-    for i in range(CONFIG.threads):
+    for i in range(16):
         p = Process(target=worker, args=(task_queue, out_queue, CONFIG))
         p.start()
 
@@ -462,4 +462,5 @@ def main():
 
 
 if __name__ == "__main__":
-    print(check_file('pic/2.heif'))
+    # main()
+    print(check_file(r"D:\0_Immortal\IMMO-04 Pics\三次元 Model\정아\정아 006.jpg"))

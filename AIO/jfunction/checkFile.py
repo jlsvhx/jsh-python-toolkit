@@ -3,7 +3,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tkinter import filedialog
 
-import cv2  # py-opencv
+# import cv2  # py-opencv
 import sqlite3
 import zlib
 
@@ -111,6 +111,9 @@ def check_broken_images_in_folder_mu(folder_path):
     :param folder_path:
     :return:
     """
+    import time
+    time.sleep(20)
+
     image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.heif', '.heic', '.jp2', '.ico',
                         '.svg', '.eps', '.psd', '.hdr', '.pict', '.pct'}
     corrupted_path = os.path.join(folder_path, 'corrupted_images.txt')
@@ -125,14 +128,9 @@ def check_broken_images_in_folder_mu(folder_path):
             img.close()
 
             # Image manipulation is mandatory to detect few defects
-            img = Image.open(filename)  # open the image file
-            # alternative (removed) version, decode/recode:
-            # f = cStringIO.StringIO()
-            # f = io.BytesIO()
-            # img.save(f, "BMP")
-            # f.close()
-            img.transpose(Image.FLIP_LEFT_RIGHT)
-            img.close()
+            # img = Image.open(image_path)  # open the image file
+            # img.transpose(Image.FLIP_LEFT_RIGHT)
+            # img.close()
             return image_path, False  # 图像未损坏
         except Exception as e:
             pass
