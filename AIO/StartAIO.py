@@ -13,12 +13,9 @@ import aio
 
 
 from jfunction.sub2main import main as sub2main
-from jfunction.checkFile import (check_broken_images_in_folder_mu,
-                                 calculate_crc32_in_folder_mu,
-                                 open_current_sfv,
-                                 is_svf_exist)
-from jfunction.png2webpV1 import png2webpV1
-from jfunction.delblankdir import delBlankDir
+import jfunction.checkUtils as checkUtils
+import jfunction.compressUtils as compressUtils
+import jfunction.folderUtils as folderUtils
 
 
 def sleep():
@@ -62,7 +59,7 @@ class MyWindow(aio.Ui_MainWindow):
             self.current_path = selected_path
             self.updateTableView()
 
-        if is_svf_exist(selected_path):
+        if checkUtils.is_svf_exist(selected_path):
             self.pushButton_7.setEnabled(True)
         else:
             self.pushButton_7.setEnabled(False)
@@ -152,11 +149,11 @@ class MyWindow(aio.Ui_MainWindow):
         # self.path_label = QLabel("当前路径：")
 
         self.pushButton_4.clicked.connect(lambda: self.call_function_confirm(sub2main))
-        self.pushButton_6.clicked.connect(lambda: self.call_function_confirm(calculate_crc32_in_folder_mu))
-        self.pushButton.clicked.connect(lambda: self.call_function_confirm(check_broken_images_in_folder_mu))
-        self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(png2webpV1))
-        self.pushButton_5.clicked.connect(lambda: self.call_function_confirm(delBlankDir))
-        self.pushButton_7.clicked.connect(lambda: self.call_function_no_confirm(open_current_sfv))
+        self.pushButton_6.clicked.connect(lambda: self.call_function_confirm(checkUtils.calculate_crc32_in_folder_mu))
+        self.pushButton.clicked.connect(lambda: self.call_function_confirm(checkUtils.check_broken_images_in_folder_mu))
+        self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(compressUtils.png2webpV1))
+        self.pushButton_5.clicked.connect(lambda: self.call_function_confirm(folderUtils.delBlankDir))
+        self.pushButton_7.clicked.connect(lambda: self.call_function_no_confirm(checkUtils.open_current_sfv))
 
         self.lcdNumber.setDigitCount(8)  # 设置显示的位数为 8 位
         self.lcdNumber.setSegmentStyle(QLCDNumber.Filled)  # 设置填充样式
