@@ -1,3 +1,3 @@
-import checkUtils as checkUtils
-import compressUtils as compressUtils
-import folderUtils as folderUtils
+from . import checkUtils
+from . import compressUtils
+from . import folderUtils
