@@ -7,7 +7,7 @@ from tkinter import filedialog
 # import cv2  # py-opencv
 import sqlite3
 import zlib
-
+import ffmpeg
 # import imageio
 from PIL import Image
 from PyQt5.QtCore import QUrl
@@ -18,6 +18,11 @@ import threading
 register_heif_opener()
 register_avif_opener()
 Image.MAX_IMAGE_PIXELS = None  # 禁用解压缩炸弹限制
+
+VIDEO_EXTENSIONS = {'avi', 'mp4', 'mov', 'mpeg', 'mpg', 'm2p', 'mkv', '3gp', 'ogg', 'flv', 'f4v', 'f4p', 'f4a', 'f4b'}
+
+IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'heif', 'heic', 'jp2', 'ico', 'svg', 'eps',
+                    'psd', 'hdr', 'pict', 'pct'}
 
 
 # 插入文件名和CRC32值到数据库
@@ -42,6 +47,11 @@ def insert_file_crc32(filename, crc32_value):
         return result[0] > 0
 
 
+def get_extension(filename):
+    file_lowercase = filename.lower()
+    return os.path.splitext(file_lowercase)[1][1:]
+
+
 # 计算文件的CRC32值
 def calculate_crc32(file_path):
     try:
@@ -56,7 +66,7 @@ def calculate_crc32(file_path):
 
 def magick_identify_check(filename):
     proc = Popen(['identify', '-verbose', '-regard-warnings', filename], stdout=PIPE,
-                 stderr=PIPE)  # '-verbose',
+                 stderr=PIPE)
     out, err = proc.communicate()
     exitcode = proc.returncode
     if exitcode != 0:
@@ -74,23 +84,39 @@ def pil_check(filename):
     img.verify()  # verify that it is a good image, without decoding it.. quite fast
     img.close()
 
-    # # Image manipulation is mandatory to detect few defects
-    # img = Image.open(filename)  # open the image file
-    # # alternative (removed) version, decode/recode:
-    # # f = cStringIO.StringIO()
-    # # f = io.BytesIO()
-    # # img.save(f, "BMP")
-    # # f.close()
-    # img.transpose(Image.FLIP_LEFT_RIGHT)
-    # img.close()
+
+def check_size(filename, zero_exception=True):
+    statfile = os.stat(filename)
+    filesize = statfile.st_size
+    if filesize == 0 and zero_exception:
+        raise SyntaxError("Zero size file")
+    return filesize
+
+
+def ffmpeg_check(filename, error_detect='default', threads=0):
+    if error_detect == 'default':
+        stream = ffmpeg.input(filename)
+    else:
+        if error_detect == 'strict':
+            custom = '+crccheck+bitstream+buffer+explode'
+        else:
+            custom = error_detect
+        stream = ffmpeg.input(filename, **{'err_detect': custom, 'threads': threads})
+
+    stream = stream.output('pipe:', format="null")
+    stream.run(capture_stdout=True, capture_stderr=True)
 
 
 def check_file(filename, strict_level=2):
     try:
+        check_size(filename)
         if strict_level in [0, 1]:
             pil_check(filename)
         if strict_level in [0, 2]:
             magick_identify_check(filename)
+
+        # if get_extension(filename) in VIDEO_EXTENSIONS:
+        #     ffmpeg_check(filename)
 
     except Exception as e:
         return (filename, str(e)), False  # 图片损坏
@@ -105,9 +131,6 @@ def check_broken_images_in_folder_mu(folder_path):
     :param folder_path:
     :return:
     """
-    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp',
-                        '.heif', '.heic', '.jp2', '.ico',
-                        '.svg', '.eps', '.psd', '.hdr', '.pict', '.pct'}
 
     corrupted_path = os.path.join(folder_path, 'corrupted_images.txt')
     intact_path = os.path.join(folder_path, 'intact_images.txt')
@@ -124,9 +147,8 @@ def check_broken_images_in_folder_mu(folder_path):
             for root, dirs, files in os.walk(folder_path):
                 for filename in files:
                     image_path = os.path.join(root, filename)
-                    _, file_ext = os.path.splitext(filename)
-                    file_ext = file_ext.lower()
-                    if file_ext in image_extensions:
+                    file_ext = get_extension(filename)
+                    if file_ext in IMAGE_EXTENSIONS:
                         # 提交图像处理任务到线程池，并收集 Future 对象
                         future = executor.submit(check_file, image_path, strict_level)
                         futures.append(future)
@@ -140,7 +162,7 @@ def check_broken_images_in_folder_mu(folder_path):
                     # 如果需要，可以在这里处理完整的图像
                     pass
                 else:
-                    print(f"图像 {detail[0]} 损坏！{detail[1]}\n")
+                    print(f"图像 {detail[0]} 损坏！{detail[1]}")
                     corrupted_file.write(f"图像 {image_path} 损坏！{detail[1]}\n")
 
     print("检查损坏图片 完成")
