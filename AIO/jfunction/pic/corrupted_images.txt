@@ -1,0 +1,2 @@
+图像 pic\non_image_files.txt 损坏！Identify error:identify.exe: Not a JPEG file: starts with 0x00 0x00 `pic\\1.jpg' @ error/jpeg.c/JPEGErrorHandler/339.;
+图像 pic\non_image_files.txt 损坏！Identify error:identify.exe: Premature end of JPEG file `pic\\dge40.jpg' @ warning/jpeg.c/JPEGWarningHandler/390.;identify.exe: Corrupt JPEG data: premature end of data segment `pic\\dge40.jpg' @ warning/jpeg.c/JPEGWarningHandler/390.
