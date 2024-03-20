@@ -1,21 +1,17 @@
 import os.path
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from datetime import time
 
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QModelIndex, QTimer, Qt, QUrl, QDir, QTime, QObject, pyqtSignal, QThread
-from PyQt5.QtGui import QFont, QDesktopServices, QColor
+
+from PyQt5.QtCore import QTimer, Qt, QUrl, QDir, QTime, QObject, pyqtSignal, QThread
+from PyQt5.QtGui import QFont, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
     QStatusBar, QMenu, QAction, QLCDNumber
 
 import aio
 
 
-from jfunction.sub2main import main as sub2main
-import jfunction.checkUtils as checkUtils
-import jfunction.compressUtils as compressUtils
-import jfunction.folderUtils as folderUtils
+from jfunction import checkUtils, compressUtils, folderUtils
 
 
 def sleep():
@@ -113,7 +109,7 @@ class MyWindow(aio.Ui_MainWindow):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
-        MainWindow.resize(1200, 600)
+        MainWindow.resize(1400, 900)
         # 创建文件系统模型
         self.model = QFileSystemModel()
         self.model.setRootPath("")  # 设置根路径为空，显示整个文件系统树
@@ -148,7 +144,7 @@ class MyWindow(aio.Ui_MainWindow):
         # self.select_button.clicked.connect(self.select_path)
         # self.path_label = QLabel("当前路径：")
 
-        self.pushButton_4.clicked.connect(lambda: self.call_function_confirm(sub2main))
+        self.pushButton_4.clicked.connect(lambda: self.call_function_confirm(folderUtils.sub2main_clear))
         self.pushButton_6.clicked.connect(lambda: self.call_function_confirm(checkUtils.calculate_crc32_in_folder_mu))
         self.pushButton.clicked.connect(lambda: self.call_function_confirm(checkUtils.check_broken_images_in_folder_mu))
         self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(compressUtils.png2webpV1))
