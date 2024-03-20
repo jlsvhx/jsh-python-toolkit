@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeader
 
 import aio
 
+
 from jfunction.sub2main import main as sub2main
 from jfunction.checkFile import (check_broken_images_in_folder_mu,
                                  calculate_crc32_in_folder_mu,
@@ -18,6 +19,12 @@ from jfunction.checkFile import (check_broken_images_in_folder_mu,
                                  is_svf_exist)
 from jfunction.png2webpV1 import png2webpV1
 from jfunction.delblankdir import delBlankDir
+
+
+def sleep():
+    import time
+    time.sleep(30)
+    print('sleep done')
 
 
 class Worker(QObject):
@@ -44,6 +51,7 @@ class MyWindow(aio.Ui_MainWindow):
     def __init__(self):
         self.current_path = None
         self.model = None
+        self.executor = ThreadPoolExecutor(5)
 
     def onTreeViewClicked(self, index):
         self.expandAndCollapse(index)
@@ -225,8 +233,7 @@ class MyWindow(aio.Ui_MainWindow):
             print(f"文件夹地址为空")
         else:
             # function(sourcedir, outputdir)
-            with ThreadPoolExecutor() as executor:
-                executor.submit(function, sourcedir, outputdir)
+            self.executor.submit(function, sourcedir, outputdir)
 
 
 
@@ -240,8 +247,7 @@ class MyWindow(aio.Ui_MainWindow):
             print(msg)
             print('Proceeding...')
             # function(selected_file_path)
-            with ThreadPoolExecutor() as executor:
-                executor.submit(function, selected_file_path)
+            self.executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
 
@@ -257,8 +263,7 @@ class MyWindow(aio.Ui_MainWindow):
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
                 # function(selected_file_path)
-                with ThreadPoolExecutor() as executor:
-                    executor.submit(function, selected_file_path)
+                self.executor.submit(function, selected_file_path)
             else:
                 print('Cancelled')
         else:

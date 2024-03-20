@@ -1,6 +1,7 @@
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from subprocess import Popen, PIPE
 from tkinter import filedialog
 
 # import cv2  # py-opencv
@@ -11,10 +12,11 @@ import zlib
 from PIL import Image
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QDesktopServices
-from pillow_heif import register_heif_opener  # pip3 install pillow-heif
+from pillow_heif import register_heif_opener, register_avif_opener  # pip3 install pillow-heif
 import threading
 
 register_heif_opener()
+register_avif_opener()
 Image.MAX_IMAGE_PIXELS = None  # 禁用解压缩炸弹限制
 
 
@@ -52,57 +54,43 @@ def calculate_crc32(file_path):
         return None
 
 
-def is_image_corrupted(image_path):
+def magick_identify_check(filename):
+    proc = Popen(['identify', '-regard-warnings', filename], stdout=PIPE,
+                 stderr=PIPE)  # '-verbose',
+    out, err = proc.communicate()
+    exitcode = proc.returncode
+    if exitcode != 0:
+        raise Exception('Identify error:' + str(exitcode))
+    return out
+
+
+def pil_check(filename):
+    img = Image.open(filename)  # open the image file
+    img.verify()  # verify that it is a good image, without decoding it.. quite fast
+    img.close()
+
+    # # Image manipulation is mandatory to detect few defects
+    # img = Image.open(filename)  # open the image file
+    # # alternative (removed) version, decode/recode:
+    # # f = cStringIO.StringIO()
+    # # f = io.BytesIO()
+    # # img.save(f, "BMP")
+    # # f.close()
+    # img.transpose(Image.FLIP_LEFT_RIGHT)
+    # img.close()
+
+
+def check_file(filename, strict_level=2):
     try:
-        img = Image.open(image_path)
-        img.verify()
-        img.close()
-        return False  # 图像未损坏
+        if strict_level in [0, 1]:
+            pil_check(filename)
+        if strict_level in [0, 2]:
+            magick_identify_check(filename)
+
     except Exception as e:
-        pass
+        return filename, False  # 图片损坏
 
-    try:
-        img = cv2.imread(image_path)
-        if img is None:
-            pass
-        else:
-            return False  # 图像未损坏
-    except Exception as e:
-        pass
-
-    return True  # 图像损坏
-
-
-def check_images_in_folder(folder_path):
-    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.heif', '.heic', '.jp2', '.ico',
-                        '.svg', '.eps', '.psd', '.hdr', '.pict', '.pct'}
-    corrupted_path = os.path.join(folder_path, 'corrupted_images.txt')
-    intact_path = os.path.join(folder_path, 'intact_images.txt')
-    non_image_path = os.path.join(folder_path, 'non_image_files.txt')
-
-    with open(corrupted_path, 'w', encoding='utf-8') as corrupted_file, \
-            open(intact_path, 'w', encoding='utf-8') as intact_file, \
-            open(non_image_path, 'w', encoding='utf-8') as non_image_file:
-        for root, dirs, files in os.walk(folder_path):
-            for filename in files:
-                image_path = os.path.join(root, filename)
-                # 获取文件后缀名
-                file_name, file_ext = os.path.splitext(filename)
-                file_ext = file_ext.lower()
-                # 检查文件是否是图像格式
-                if file_ext in image_extensions:
-                    if is_image_corrupted(image_path):
-                        corrupted_file.write(f"图像 {image_path} 损坏！\n")
-                    # else:
-                    #     if not is_image_in_database(file_name):
-                    #         crc32_value = calculate_crc32(image_path)
-                    #         if crc32_value is not None:
-                    #             print(f"CRC32 for {file_name}: {crc32_value}")
-                    #             # 将文件名和CRC32值插入到数据库中
-                    #             insert_file_crc32(image_path, crc32_value)
-                    #     # intact_file.write(f"图像 {image_path} 未损坏！\n")
-                else:
-                    non_image_file.write(f"文件 {image_path} 不是图像文件！\n")
+    return filename, True  # 图片完整
 
 
 def check_broken_images_in_folder_mu(folder_path):
@@ -111,40 +99,13 @@ def check_broken_images_in_folder_mu(folder_path):
     :param folder_path:
     :return:
     """
-    import time
-    time.sleep(20)
-
-    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.heif', '.heic', '.jp2', '.ico',
+    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp',
+                        '.heif', '.heic', '.jp2', '.ico',
                         '.svg', '.eps', '.psd', '.hdr', '.pict', '.pct'}
+
     corrupted_path = os.path.join(folder_path, 'corrupted_images.txt')
     intact_path = os.path.join(folder_path, 'intact_images.txt')
     non_image_path = os.path.join(folder_path, 'non_image_files.txt')
-
-    def process_image(image_path):
-
-        try:
-            img = Image.open(image_path)
-            img.verify()
-            img.close()
-
-            # Image manipulation is mandatory to detect few defects
-            # img = Image.open(image_path)  # open the image file
-            # img.transpose(Image.FLIP_LEFT_RIGHT)
-            # img.close()
-            return image_path, False  # 图像未损坏
-        except Exception as e:
-            pass
-
-        # try:
-        #     img = cv2.imread(image_path)
-        #     if img is None:
-        #         pass
-        #     else:
-        #         return image_path, False  # 图像未损坏
-        # except Exception as e:
-        #     pass
-
-        return image_path, True  # 图像损坏
 
     with open(corrupted_path, 'w', encoding='utf-8') as corrupted_file, \
             open(intact_path, 'w', encoding='utf-8') as intact_file, \
@@ -161,20 +122,20 @@ def check_broken_images_in_folder_mu(folder_path):
                     file_ext = file_ext.lower()
                     if file_ext in image_extensions:
                         # 提交图像处理任务到线程池，并收集 Future 对象
-                        future = executor.submit(process_image, image_path)
+                        future = executor.submit(check_file, image_path, 2)
                         futures.append(future)
                     else:
                         non_image_file.write(f"文件 {image_path} 不是图像文件！\n")
 
             # 处理所有任务的结果
             for future in as_completed(futures):
-                image_path, is_corrupted = future.result()
-                if is_corrupted:
-                    print(f"图像 {image_path} 损坏！\n")
-                    corrupted_file.write(f"图像 {image_path} 损坏！\n")
-                else:
+                image_path, is_success = future.result()
+                if is_success:
                     # 如果需要，可以在这里处理完整的图像
                     pass
+                else:
+                    print(f"图像 {image_path} 损坏！\n")
+                    corrupted_file.write(f"图像 {image_path} 损坏！\n")
 
     print("检查损坏图片 完成")
 
@@ -366,8 +327,8 @@ def is_svf_exist(dir):
             return True
     return False
 
-def process_image2(image_path):
 
+def process_image2(image_path):
     try:
         img = Image.open(image_path)
         img.verify()
@@ -395,10 +356,10 @@ def process_image2(image_path):
 
     return image_path, True  # 图像损坏
 
+
 if __name__ == '__main__':
     # check_broken_images_in_folder_mu('pic')
     # print(process_image2('pic/3.jpg'))
     img = Image.open('pic/3.webp')
     img.verify()
     img.close()
-
