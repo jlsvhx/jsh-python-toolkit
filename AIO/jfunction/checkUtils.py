@@ -143,7 +143,7 @@ def check_broken_images_in_folder_mu(folder_path):
             open(non_image_path, 'w', encoding='utf-8') as non_image_file:
 
         # 创建线程池
-        with ThreadPoolExecutor(10) as executor:
+        with ThreadPoolExecutor(5) as executor:
             # 存储所有任务的 Future 对象
             futures = []
             for root, dirs, files in os.walk(folder_path):
@@ -332,7 +332,7 @@ def calculate_crc32_in_folder_mu(main_directory, thread_count=1):
     folders_to_process = [all_dirs[i:i + work_size] for i in range(0, len(all_dirs), work_size)]
 
     # 多线程处理
-    with ThreadPoolExecutor(max_workers=thread_count) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         for folders in folders_to_process:
             executor.map(process_sfv_files_in_directory, folders)
 
