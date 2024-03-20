@@ -1,3 +1,10 @@
+# https://github.com/ftarlao/check-media-integrity
+# ffmpeg-python==0.1.17
+# future==0.17.1
+# Pillow-SIMD==5.3.0.post0
+# PyPDF2==1.26.0
+# Wand==0.4.5
+# ImageMagick-6.9.13-7-Q16-HDRI-x64-dll.exe
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
