@@ -119,7 +119,7 @@ def arg_parser():
                         help='uses different apporach for checking images depending on %(metavar)s integer value. '
                              'Accepted values 0,1 (default),2: 0 ImageMagick idenitfy, 1 Pillow library+ImageMagick, '
                              '2 applies both 0+1 checks',
-                        dest='strict_level', default=1)
+                        dest='strict_level', default=0)
     parser.add_argument('-t', '--threads', metavar='T', type=int,
                         help='number of parallel threads used for speedup, default is ten. Single file execution does'
                              'not take advantage of the thread option',
@@ -157,7 +157,6 @@ def setup(configuration):
 
 
 def pil_check(filename):
-    print(filename)
     img = ImageP.open(filename)  # open the image file
     img.verify()  # verify that it is a good image, without decoding it.. quite fast
     img.close()
@@ -187,10 +186,17 @@ def magick_check(filename, flip=True):
 def magick_identify_check(filename):
     proc = Popen(['identify', '-regard-warnings', filename], stdout=PIPE,
                  stderr=PIPE)  # '-verbose',
+    # proc = Popen(['identify', '-verbose', '-regard-warnings', filename], stdout=PIPE,
+    #              stderr=PIPE)
     out, err = proc.communicate()
     exitcode = proc.returncode
     if exitcode != 0:
-        raise Exception('Identify error:' + str(exitcode))
+        # err = str(err)
+        # err = err[2:]
+        # err = err[:-1]
+        # lines = err.split(r'\r\n')
+        # first_two_lines = ';'.join(lines[:2])
+        raise Exception('Identify error:' + str(err))
     return out
 
 
@@ -302,7 +308,7 @@ def is_pil_simd():
     return 'post' in PIL.__version__
 
 
-def check_file(filename, error_detect='default', strict_level=1, zero_detect=0, ffmpeg_threads=0):
+def check_file(filename, error_detect='default', strict_level=0, zero_detect=0, ffmpeg_threads=0):
     if sys.version_info[0] < 3:
         filename = filename.decode('utf8')
 
@@ -317,10 +323,11 @@ def check_file(filename, error_detect='default', strict_level=1, zero_detect=0, 
             check_zeros(filename, CONFIG.zero_detect)
 
         if file_ext in PIL_EXTENSIONS:
-            if strict_level in [1, 2]:
-                pil_check(filename)
-            if strict_level in [0, 2]:
-                magick_identify_check(filename)
+            magick_identify_check(filename)
+            # if strict_level in [1, 2]:
+            #     pil_check(filename)
+            # if strict_level in [0, 2]:
+            #     magick_identify_check(filename)
 
         if file_ext in PDF_EXTENSIONS:
             if strict_level in [1, 2]:
@@ -462,5 +469,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    print(check_file(r"D:\0_Immortal\IMMO-04 Pics\三次元 Model\정아\정아 006.jpg"))
+    main()
+    # print(check_file(r"D:\0_Immortal\IMMO-04 Pics\三次元 Model\정아\정아 006.jpg"))
