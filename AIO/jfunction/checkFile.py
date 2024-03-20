@@ -55,12 +55,17 @@ def calculate_crc32(file_path):
 
 
 def magick_identify_check(filename):
-    proc = Popen(['identify', '-regard-warnings', filename], stdout=PIPE,
+    proc = Popen(['identify', '-verbose', '-regard-warnings', filename], stdout=PIPE,
                  stderr=PIPE)  # '-verbose',
     out, err = proc.communicate()
     exitcode = proc.returncode
     if exitcode != 0:
-        raise Exception('Identify error:' + str(err))
+        err = str(err)
+        err = err[2:]
+        err = err[:-1]
+        lines = err.split(r'\r\n')
+        first_two_lines = ';'.join(lines[:2])
+        raise Exception('Identify error:' + str(first_two_lines))
     return out
 
 
