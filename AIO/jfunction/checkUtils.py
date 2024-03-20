@@ -152,7 +152,6 @@ def check_broken_images_in_folder_mu(folder_path):
                     file_ext = get_extension(filename)
                     if file_ext in IMAGE_EXTENSIONS:
                         # 提交图像处理任务到线程池，并收集 Future 对象
-                        print(image_path)
                         future = executor.submit(check_file, image_path, strict_level)
                         futures.append(future)
                     else:
