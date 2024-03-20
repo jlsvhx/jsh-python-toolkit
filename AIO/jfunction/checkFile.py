@@ -60,7 +60,7 @@ def magick_identify_check(filename):
     out, err = proc.communicate()
     exitcode = proc.returncode
     if exitcode != 0:
-        raise Exception('Identify error:' + str(exitcode))
+        raise Exception('Identify error:' + str(err))
     return out
 
 
@@ -88,12 +88,13 @@ def check_file(filename, strict_level=2):
             magick_identify_check(filename)
 
     except Exception as e:
-        return filename, False  # 图片损坏
+        return (filename, str(e)), False  # 图片损坏
 
-    return filename, True  # 图片完整
+    return (filename, None), True  # 图片完整
 
 
 def check_broken_images_in_folder_mu(folder_path):
+    strict_level = 2
     """
     检查输入目录下有多少损坏的图像文件，并将信息写入到输入目录下的corrupted_images.txt（多线程）
     :param folder_path:
@@ -122,20 +123,20 @@ def check_broken_images_in_folder_mu(folder_path):
                     file_ext = file_ext.lower()
                     if file_ext in image_extensions:
                         # 提交图像处理任务到线程池，并收集 Future 对象
-                        future = executor.submit(check_file, image_path, 2)
+                        future = executor.submit(check_file, image_path, strict_level)
                         futures.append(future)
                     else:
                         non_image_file.write(f"文件 {image_path} 不是图像文件！\n")
 
             # 处理所有任务的结果
             for future in as_completed(futures):
-                image_path, is_success = future.result()
+                detail, is_success = future.result()
                 if is_success:
                     # 如果需要，可以在这里处理完整的图像
                     pass
                 else:
-                    print(f"图像 {image_path} 损坏！\n")
-                    corrupted_file.write(f"图像 {image_path} 损坏！\n")
+                    print(f"图像 {detail[0]} 损坏！{detail[1]}\n")
+                    corrupted_file.write(f"图像 {image_path} 损坏！{detail[1]}\n")
 
     print("检查损坏图片 完成")
 
@@ -358,8 +359,5 @@ def process_image2(image_path):
 
 
 if __name__ == '__main__':
-    # check_broken_images_in_folder_mu('pic')
-    # print(process_image2('pic/3.jpg'))
-    img = Image.open('pic/3.webp')
-    img.verify()
-    img.close()
+    check_broken_images_in_folder_mu('pic')
+
