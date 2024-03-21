@@ -72,17 +72,12 @@ def calculate_crc32(file_path):
 
 
 def magick_identify_check(filename):
-    proc = Popen(['identify', '-verbose', '-regard-warnings', filename], stdout=PIPE,
-                 stderr=PIPE)
+    proc = Popen(['identify', '-regard-warnings', filename], stdout=PIPE,
+                 stderr=PIPE)  # '-verbose',
     out, err = proc.communicate()
     exitcode = proc.returncode
     if exitcode != 0:
-        err = str(err)
-        err = err[2:]
-        err = err[:-1]
-        lines = err.split(r'\r\n')
-        first_two_lines = ';'.join(lines[:2])
-        raise Exception('Identify error:' + str(first_two_lines))
+        raise Exception('Identify error:' + str(err))
     return out
 
 
@@ -116,7 +111,7 @@ def ffmpeg_check(filename, error_detect='default', threads=0):
 
 def check_file(filename, strict_level=2):
     try:
-        check_size(filename)
+        # check_size(filename)
         if strict_level in [0, 1]:
             pil_check(filename)
         if strict_level in [0, 2]:
@@ -148,7 +143,7 @@ def check_broken_images_in_folder_mu(folder_path):
             open(non_image_path, 'w', encoding='utf-8') as non_image_file:
 
         # 创建线程池
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(5) as executor:
             # 存储所有任务的 Future 对象
             futures = []
             for root, dirs, files in os.walk(folder_path):
@@ -337,7 +332,7 @@ def calculate_crc32_in_folder_mu(main_directory, thread_count=1):
     folders_to_process = [all_dirs[i:i + work_size] for i in range(0, len(all_dirs), work_size)]
 
     # 多线程处理
-    with ThreadPoolExecutor(max_workers=thread_count) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         for folders in folders_to_process:
             executor.map(process_sfv_files_in_directory, folders)
 

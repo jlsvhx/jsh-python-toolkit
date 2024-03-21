@@ -15,8 +15,18 @@ from jfunction import checkUtils, compressUtils, folderUtils
 
 
 
+class WorkerThread(QThread):
+    finished = pyqtSignal()
 
+    def __init__(self, function, *args, **kwargs):
+        super().__init__()
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
 
+    def run(self):
+        self.function(*self.args, **self.kwargs)
+        self.finished.emit()
 
 class MyWindow(aio.Ui_MainWindow):
 
@@ -30,6 +40,7 @@ class MyWindow(aio.Ui_MainWindow):
         self.current_path = None
         self.model = None
         self.executor = ThreadPoolExecutor(5)
+        self.worker_thread = WorkerThread(function=None)  # 为了避免初始化时报错，先设置一个空的函数
 
     def onTreeViewClicked(self, index):
         self.expandAndCollapse(index)
@@ -94,7 +105,7 @@ class MyWindow(aio.Ui_MainWindow):
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
 
-        MainWindow.resize(1400, 900)
+        MainWindow.resize(1200, 600)
         # 创建文件系统模型
         self.model = QFileSystemModel()
         self.model.setRootPath("")  # 设置根路径为空，显示整个文件系统树
@@ -186,6 +197,9 @@ class MyWindow(aio.Ui_MainWindow):
         else:
             function(sourcedir, outputdir)
             # self.executor.submit(function, sourcedir, outputdir)
+            self.worker_thread = WorkerThread(function, sourcedir, outputdir)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
 
 
 
@@ -198,13 +212,16 @@ class MyWindow(aio.Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            function(selected_file_path)
+            self.worker_thread = WorkerThread(function, selected_file_path)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
             # self.executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
 
     def call_function_confirm(self, function):
-
+        # Modify to use worker thread...
+        # Example:
         selected_index = self.treeView.selectionModel().currentIndex()
         selected_file_path = self.model.filePath(selected_index)
         if os.path.isdir(selected_file_path):
@@ -214,12 +231,18 @@ class MyWindow(aio.Ui_MainWindow):
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
-                function(selected_file_path)
-                # self.executor.submit(function, selected_file_path)
+                self.worker_thread = WorkerThread(function, selected_file_path)
+                self.worker_thread.finished.connect(self.on_thread_finished)
+                self.worker_thread.start()
             else:
                 print('Cancelled')
         else:
             print(f"{selected_file_path} is not a directory")
+
+    # Add method to handle thread finished signal
+    def on_thread_finished(self):
+        print("Thread finished")
+
 
 
 if __name__ == '__main__':
