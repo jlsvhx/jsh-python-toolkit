@@ -252,7 +252,7 @@ if __name__ == '__main__':
 
     ui = MyWindow()
     ui.setupUi(MainWindow)
-    sys.stdout.write = ui.write_console
+    # sys.stdout.write = ui.write_console
     MainWindow.show()
     # 示例输出
     print("JSH Toolkit")

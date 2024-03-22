@@ -1,7 +1,7 @@
 keyset = set()
 def generate_insert_statement(key, zh, en=None, sp=None, ru=None, fr=None):
-    insert_statement = "INSERT INTO `i18n` (`wkey`, `zh`, `en`, `sp`, `ru`, `fr`) VALUES "
-    values = f"('{key}', '{zh}', '{en}', '{sp}', '{ru}', '{fr}')"
+    insert_statement = "INSERT INTO `i18n` (`wkey`, `zh`) VALUES "
+    values = f"('{key}', '{zh}')"
     return insert_statement + values + ";"
 
 def read_properties_file(file_path):
