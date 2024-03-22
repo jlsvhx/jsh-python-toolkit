@@ -28,11 +28,15 @@ class WorkerThread(QThread):
 
 class MyWindow(Ui_MainWindow):
 
+    def clear_text(self):
+        # 清除文本编辑框中的所有内容
+        self.textEdit.clear()
+
     def write_console(self, text):
         font = QFont("微软雅黑", 12)  # 设置字体为Arial，大小为12
         self.textEdit.setFont(font)
         self.textEdit.moveCursor(self.textEdit.textCursor().End)  # 将光标移到末尾
-        self.textEdit.insertPlainText(text)  # 插入文本
+        self.textEdit.insertPlainText(text+"\n")  # 插入文本
 
     def println_console(self,text):
         font = QFont("微软雅黑", 12)  # 设置字体为Arial，大小为12
@@ -44,7 +48,7 @@ class MyWindow(Ui_MainWindow):
         self.current_path = None
         self.model = None
         self.executor = ThreadPoolExecutor(5)
-        self.worker_thread = WorkerThread(function=None)  # 为了避免初始化时报错，先设置一个空的函数
+        # self.worker_thread = WorkerThread(function=None)  # 为了避免初始化时报错，先设置一个空的函数
 
     def onTreeViewClicked(self, index):
         self.expandAndCollapse(index)
@@ -201,9 +205,9 @@ class MyWindow(Ui_MainWindow):
         else:
             function(sourcedir, outputdir)
             # self.executor.submit(function, sourcedir, outputdir)
-            self.worker_thread = WorkerThread(function, sourcedir, outputdir)
-            self.worker_thread.finished.connect(self.on_thread_finished)
-            self.worker_thread.start()
+            worker_thread = WorkerThread(function, sourcedir, outputdir)
+            worker_thread.finished.connect(self.on_thread_finished)
+            worker_thread.start()
 
 
 
@@ -216,9 +220,9 @@ class MyWindow(Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            self.worker_thread = WorkerThread(function, selected_file_path)
-            self.worker_thread.finished.connect(self.on_thread_finished)
-            self.worker_thread.start()
+            worker_thread = WorkerThread(function, selected_file_path)
+            worker_thread.finished.connect(self.on_thread_finished)
+            worker_thread.start()
             # self.executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
@@ -235,9 +239,9 @@ class MyWindow(Ui_MainWindow):
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
-                self.worker_thread = WorkerThread(function, selected_file_path)
-                self.worker_thread.finished.connect(self.on_thread_finished)
-                self.worker_thread.start()
+                worker_thread = WorkerThread(function, selected_file_path)
+                worker_thread.finished.connect(self.on_thread_finished)
+                worker_thread.start()
             else:
                 print('Cancelled')
         else:
