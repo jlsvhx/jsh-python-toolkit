@@ -36,6 +36,12 @@ class MyWindow(aio.Ui_MainWindow):
         self.textEdit.moveCursor(self.textEdit.textCursor().End)  # 将光标移到末尾
         self.textEdit.insertPlainText(text)  # 插入文本
 
+    def println_console(self,text):
+        font = QFont("微软雅黑", 12)  # 设置字体为Arial，大小为12
+        self.textEdit.setFont(font)
+        self.textEdit.moveCursor(self.textEdit.textCursor().End)  # 将光标移到末尾
+        self.textEdit.insertPlainText(text)  # 插入文本
+
     def __init__(self):
         self.current_path = None
         self.model = None
@@ -46,7 +52,7 @@ class MyWindow(aio.Ui_MainWindow):
         self.expandAndCollapse(index)
         self.resizeTreeViewColumns()
         selected_path = self.model.filePath(index)
-        print(f"selected path: {selected_path}")
+        self.write_console(f"selected path: {selected_path}")
         if self.model.isDir(index):
             self.current_path = selected_path
             self.updateTableView()
