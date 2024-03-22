@@ -3,14 +3,12 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 
-from PyQt5.QtCore import QTimer, Qt, QUrl, QDir, QTime, QObject, pyqtSignal, QThread
+from PyQt5.QtCore import QTimer, Qt, QUrl, QDir, QTime, pyqtSignal, QThread
 from PyQt5.QtGui import QFont, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
     QStatusBar, QMenu, QAction, QLCDNumber
 
-import aio
-
-
+from ui import Ui_MainWindow
 from jfunction import checkUtils, compressUtils, folderUtils
 
 
@@ -28,7 +26,7 @@ class WorkerThread(QThread):
         self.function(*self.args, **self.kwargs)
         self.finished.emit()
 
-class MyWindow(aio.Ui_MainWindow):
+class MyWindow(Ui_MainWindow):
 
     def write_console(self, text):
         font = QFont("微软雅黑", 12)  # 设置字体为Arial，大小为12

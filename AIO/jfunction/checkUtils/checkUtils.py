@@ -241,5 +241,5 @@ def process_image2(image_path):
 
 
 if __name__ == '__main__':
-    calculate_crc32_in_folder_mu('pic')
+    pass
 
