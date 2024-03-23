@@ -205,9 +205,9 @@ class MyWindow(Ui_MainWindow):
         else:
             function(sourcedir, outputdir)
             # self.executor.submit(function, sourcedir, outputdir)
-            worker_thread = WorkerThread(function, sourcedir, outputdir)
-            worker_thread.finished.connect(self.on_thread_finished)
-            worker_thread.start()
+            self.worker_thread = WorkerThread(function, sourcedir, outputdir)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
 
 
 
@@ -220,9 +220,9 @@ class MyWindow(Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            worker_thread = WorkerThread(function, selected_file_path)
-            worker_thread.finished.connect(self.on_thread_finished)
-            worker_thread.start()
+            self.worker_thread = WorkerThread(function, selected_file_path)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
             # self.executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
@@ -239,9 +239,9 @@ class MyWindow(Ui_MainWindow):
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
-                worker_thread = WorkerThread(function, selected_file_path)
-                worker_thread.finished.connect(self.on_thread_finished)
-                worker_thread.start()
+                self.worker_thread = WorkerThread(function, selected_file_path)
+                self.worker_thread.finished.connect(self.on_thread_finished)
+                self.worker_thread.start()
             else:
                 print('Cancelled')
         else:
