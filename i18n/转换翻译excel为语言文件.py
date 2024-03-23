@@ -41,4 +41,4 @@ def read_excel(filename):
 
 
 if __name__ == '__main__':
-    read_excel("tbd.xlsx")
+    read_excel("fin_excel/历史曲线标签20240322.xlsx")
