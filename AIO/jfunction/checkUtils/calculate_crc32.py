@@ -190,7 +190,7 @@ def calculate_crc32_in_folder_mu(main_directory):
             count += 1
             out_queue.get(block=True, timeout=120)
             # visualization logs and stats
-            print("Number of processed folder ", count)
+            # print("Number of processed folder", count)
     except Empty as e:
         print("Waiting other results for too much time, perhaps you have to raise the timeout", e.message)
     print("\n**CRC32 Task completed**\n")
