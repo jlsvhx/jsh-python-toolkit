@@ -45,12 +45,14 @@ class MyWindow(Ui_MainWindow):
         self.textEdit.insertPlainText(text)  # 插入文本
 
     def __init__(self):
+        self.current_index = None
         self.current_path = None
         self.model = None
         self.executor = ThreadPoolExecutor(5)
         # self.worker_thread = WorkerThread(function=None)  # 为了避免初始化时报错，先设置一个空的函数
 
     def onTreeViewClicked(self, index):
+        self.current_index = index
         self.expandAndCollapse(index)
         self.resizeTreeViewColumns()
         selected_path = self.model.filePath(index)
@@ -69,6 +71,13 @@ class MyWindow(Ui_MainWindow):
         self.lineEdit.setText(f"当前路径：{selected_file_path}")
 
         self.setStatusBarMessage(os.path.basename(selected_path))
+
+    def return2parent(self):
+        if hasattr(self, 'current_index'):
+            parent_index = self.current_index.parent()
+            if parent_index.isValid():
+                self.treeView.setCurrentIndex(parent_index)
+                self.current_index = parent_index
 
 
     def expandAndCollapse(self, index):
@@ -154,6 +163,8 @@ class MyWindow(Ui_MainWindow):
         self.pushButton_3.clicked.connect(lambda: self.callfunctionWithoutSelect(compressUtils.png2webpV1))
         self.pushButton_5.clicked.connect(lambda: self.call_function_confirm(folderUtils.delBlankDir))
         self.pushButton_7.clicked.connect(lambda: self.call_function_no_confirm(checkUtils.open_current_sfv))
+        self.pushButton_9.clicked.connect(self.clear_text)
+        self.pushButton_12.clicked.connect(self.return2parent)
 
         self.lcdNumber.setDigitCount(8)  # 设置显示的位数为 8 位
         self.lcdNumber.setSegmentStyle(QLCDNumber.Filled)  # 设置填充样式
@@ -205,9 +216,9 @@ class MyWindow(Ui_MainWindow):
         else:
             function(sourcedir, outputdir)
             # self.executor.submit(function, sourcedir, outputdir)
-            worker_thread = WorkerThread(function, sourcedir, outputdir)
-            worker_thread.finished.connect(self.on_thread_finished)
-            worker_thread.start()
+            self.worker_thread = WorkerThread(function, sourcedir, outputdir)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
 
 
 
@@ -220,9 +231,9 @@ class MyWindow(Ui_MainWindow):
             msg = f"selected directory: {selected_file_path}"
             print(msg)
             print('Proceeding...')
-            worker_thread = WorkerThread(function, selected_file_path)
-            worker_thread.finished.connect(self.on_thread_finished)
-            worker_thread.start()
+            self.worker_thread = WorkerThread(function, selected_file_path)
+            self.worker_thread.finished.connect(self.on_thread_finished)
+            self.worker_thread.start()
             # self.executor.submit(function, selected_file_path)
         else:
             print(f"{selected_file_path} is not a directory")
@@ -239,9 +250,9 @@ class MyWindow(Ui_MainWindow):
                                          QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
                 print('Proceeding...')
-                worker_thread = WorkerThread(function, selected_file_path)
-                worker_thread.finished.connect(self.on_thread_finished)
-                worker_thread.start()
+                self.worker_thread = WorkerThread(function, selected_file_path)
+                self.worker_thread.finished.connect(self.on_thread_finished)
+                self.worker_thread.start()
             else:
                 print('Cancelled')
         else:
