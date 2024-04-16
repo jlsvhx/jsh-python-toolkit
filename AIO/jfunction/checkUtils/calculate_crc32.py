@@ -108,7 +108,7 @@ def process_sfv_file(svf_file_apath):
                 else:
                     print(f"文件 '{filename}' 的CRC32值验证未通过")
             else:
-                print(f"文件 '{filename}' 不存在")
+                print(f"文件 '{line}' 不存在")
 
     if len(files_only_set) > 0:
         with open(svf_file_apath, 'a', encoding='utf-8') as svf:
@@ -124,13 +124,15 @@ def process_sfv_file(svf_file_apath):
 
 
 def process_sfv_files_in_directory(directory):
+
     flag = 0
-    for item in os.listdir(directory):
-        if item.endswith('.sfv'):
-            sfv_file_path = os.path.join(directory, item)
-            flag = 1
-            process_sfv_file(sfv_file_path)
-    if flag == 0:
+
+    target_sfv_name = os.path.basename(directory) + ".sfv"
+    target_sfv_path = os.path.join(directory, target_sfv_name)
+
+    if os.path.exists(target_sfv_path):
+        process_sfv_file(target_sfv_path)
+    else:
         create_sfv(directory)
 
 
@@ -197,4 +199,4 @@ def calculate_crc32_in_folder_mu(main_directory):
 
 
 if __name__ == '__main__':
-    calculate_crc32_in_folder_mu(r"E:\BaiduNetdiskDownload")
+    process_sfv_files_in_directory(r"D:\BaiduNetdiskDownload")
