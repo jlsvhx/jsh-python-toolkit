@@ -75,7 +75,7 @@ def calculate_crc32(file_path):
 
 
 def magick_identify_check(filename):
-    proc = Popen(['identify', '-regard-warnings', filename], stdout=PIPE,
+    proc = Popen([r' ..\..\lib\identify', '-regard-warnings', filename], stdout=PIPE,
                  stderr=PIPE)  # '-verbose',
     out, err = proc.communicate()
     exitcode = proc.returncode
@@ -242,4 +242,3 @@ def process_image2(image_path):
 
 if __name__ == '__main__':
     pass
-
