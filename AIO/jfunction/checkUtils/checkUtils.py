@@ -146,7 +146,7 @@ def check_broken_images_in_folder_mu(folder_path):
             open(non_image_path, 'w', encoding='utf-8') as non_image_file:
 
         # 创建线程池
-        with ThreadPoolExecutor(5) as executor:
+        with ThreadPoolExecutor(8) as executor:
             # 存储所有任务的 Future 对象
             futures = []
             for root, dirs, files in os.walk(folder_path):
@@ -168,7 +168,7 @@ def check_broken_images_in_folder_mu(folder_path):
                     pass
                 else:
                     print(f"图像 {detail[0]} 损坏！{detail[1]}")
-                    corrupted_file.write(f"图像 {image_path} 损坏！{detail[1]}\n")
+                    corrupted_file.write(f"图像 {detail[0]} 损坏！{detail[1]}\n")
 
     print("检查损坏图片 完成")
 
