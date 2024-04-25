@@ -7,6 +7,7 @@
 # ImageMagick-6.9.13-7-Q16-HDRI-x64-dll.exe
 import os
 import re
+import shutil
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Queue, Process
@@ -75,7 +76,7 @@ def calculate_crc32(file_path):
 
 
 def magick_identify_check(filename):
-    proc = Popen([r' ..\..\lib\identify', '-regard-warnings', filename], stdout=PIPE,
+    proc = Popen([r'..\..\lib\identify', '-regard-warnings', filename], stdout=PIPE,
                  stderr=PIPE)  # '-verbose',
     out, err = proc.communicate()
     exitcode = proc.returncode
@@ -132,7 +133,9 @@ def check_file(filename, strict_level=2):
 def check_broken_images_in_folder_mu(folder_path):
     strict_level = 2
     """
-    检查输入目录下有多少损坏的图像文件，并将信息写入到输入目录下的corrupted_images.txt（多线程）
+    检查输入目录下有多少损坏的图像文件，
+    如果存在图像损坏，将信息写入到输入目录下的corrupted_images.txt（多线程）
+    并将图像复制到输入目录下的corrupted_images文件夹中
     :param folder_path:
     :return:
     """
@@ -140,6 +143,10 @@ def check_broken_images_in_folder_mu(folder_path):
     corrupted_path = os.path.join(folder_path, 'corrupted_images.txt')
     intact_path = os.path.join(folder_path, 'intact_images.txt')
     non_image_path = os.path.join(folder_path, 'non_image_files.txt')
+
+    corrupted_dir = os.path.join(folder_path, 'corrupted_images')
+    if not os.path.exists(corrupted_dir):
+        os.mkdir(corrupted_dir)
 
     with open(corrupted_path, 'w', encoding='utf-8') as corrupted_file, \
             open(intact_path, 'w', encoding='utf-8') as intact_file, \
@@ -153,7 +160,7 @@ def check_broken_images_in_folder_mu(folder_path):
                 for filename in files:
                     image_path = os.path.join(root, filename)
                     file_ext = get_extension(filename)
-                    if file_ext in IMAGE_EXTENSIONS:
+                    if file_ext in IMAGE_EXTENSIONS and os.path.basename(os.path.dirname(image_path)) != "corrupted_images":
                         # 提交图像处理任务到线程池，并收集 Future 对象
                         future = executor.submit(check_file, image_path, strict_level)
                         futures.append(future)
@@ -168,6 +175,7 @@ def check_broken_images_in_folder_mu(folder_path):
                     pass
                 else:
                     print(f"图像 {detail[0]} 损坏！{detail[1]}")
+                    shutil.copy(detail[0],corrupted_dir)
                     corrupted_file.write(f"图像 {detail[0]} 损坏！{detail[1]}\n")
 
     print("检查损坏图片 完成")
@@ -241,4 +249,5 @@ def process_image2(image_path):
 
 
 if __name__ == '__main__':
+    check_broken_images_in_folder_mu("../pic")
     pass
