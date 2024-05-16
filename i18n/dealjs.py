@@ -58,7 +58,7 @@ def extractors():
         text = text.replace(f"'{key}'", f"'{value}'")
 
     # 将带有编号的异常信息写回到原文件中
-    with open("output.txt", "w", encoding='utf-8') as file:
+    with open("报警内容放i18n/替换成机型名的config.txt", "w", encoding='utf-8') as file:
         file.write(text)
 
     # 保存Excel文件
