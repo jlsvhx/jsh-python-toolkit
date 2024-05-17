@@ -1,7 +1,7 @@
 import re
 
 # 读取文本文件
-with open("input.txt", "r", encoding="utf-8") as file:
+with open("原始config.txt", "r", encoding="utf-8") as file:
     text = file.read()
 
 # 使用正则表达式匹配每个 const 开头的文本
