@@ -214,7 +214,7 @@ class MyWindow(Ui_MainWindow):
         if len(sourcedir) == 0 or len(outputdir) == 0:
             print(f"文件夹地址为空")
         else:
-            function(sourcedir, outputdir)
+            # function(sourcedir, outputdir)
             # self.executor.submit(function, sourcedir, outputdir)
             self.worker_thread = WorkerThread(function, sourcedir, outputdir)
             self.worker_thread.finished.connect(self.on_thread_finished)

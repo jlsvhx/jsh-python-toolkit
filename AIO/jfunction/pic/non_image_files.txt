@@ -1,3 +1,5 @@
-文件 pic\corrupted_images.txt 不是图像文件！
-文件 pic\intact_images.txt 不是图像文件！
-文件 pic\non_image_files.txt 不是图像文件！
+文件 ../pic\corrupted_images.txt 不是图像文件！
+文件 ../pic\intact_images.txt 不是图像文件！
+文件 ../pic\non_image_files.txt 不是图像文件！
+文件 ../pic\corrupted_images\1.jpg 不是图像文件！
+文件 ../pic\corrupted_images\dge40.jpg 不是图像文件！
