@@ -2,16 +2,18 @@ import os
 import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import sys
 
 # 定义输入和输出文件夹
-input_folder = r'E:\0_Immortal\IMMO-04 Pics\三次元 Topic'
-output_folder = r'D:\Work\convert\cache\三次元 Topic'
-error_log_file = r'D:\Work\convert\2次元error_log.txt'
+input_folder = r'E:\0_Immortal\IMMO-04 Pics\三次元 Model'
+output_folder = r'D:\Work\convert\cache\三次元 Model'
+error_log_file = r'D:\Work\convert\error_log.txt'
+
 
 # 定义处理单个文件的函数
 def process_file(input_file, output_file, extension):
+    temp_output_file = output_file + '.tmp'
 
-    temp_output_file = output_file + '.ctmp'
     # 删除可能存在的临时文件
     if os.path.exists(temp_output_file):
         os.remove(temp_output_file)
@@ -53,7 +55,7 @@ def convert_images(input_dir, output_dir):
     processed_count = 0
     total_files = sum(len(files) for _, _, files in os.walk(input_dir))
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         for root, dirs, files in os.walk(input_dir):
             for filename in files:
                 input_file = os.path.join(root, filename)
@@ -83,9 +85,15 @@ def convert_images(input_dir, output_dir):
                 future.result()
                 processed_count += 1
                 if processed_count % 10 == 0:
-                    print(f"Processed {processed_count} files out of {total_files} total files")
+                    print(f"\rProcessed {processed_count} files out of {total_files} total files", end='', flush=True)
+                    sys.stdout.flush()
             except Exception as e:
                 continue
+
+    # 最后打印完成信息
+    print(f"\rProcessed {processed_count} files out of {total_files} total files")
+    sys.stdout.flush()
+
 
 # 执行转换或复制
 convert_images(input_folder, output_folder)
