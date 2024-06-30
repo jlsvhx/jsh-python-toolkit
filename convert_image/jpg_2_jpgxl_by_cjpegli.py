@@ -4,40 +4,45 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 定义输入和输出文件夹
-input_folder = r'E:\0_Immortal\IMMO-04 Pics\2次元 角色'
-output_folder = r'D:\Work\convert\cache\2次元 角色'
+input_folder = r'E:\0_Immortal\IMMO-04 Pics\三次元 Topic'
+output_folder = r'D:\Work\convert\cache\三次元 Topic'
 error_log_file = r'D:\Work\convert\2次元error_log.txt'
 
 # 定义处理单个文件的函数
 def process_file(input_file, output_file, extension):
+
+    temp_output_file = output_file + '.ctmp'
+    # 删除可能存在的临时文件
+    if os.path.exists(temp_output_file):
+        os.remove(temp_output_file)
+
     try:
         if extension in ('.jpg', '.jpeg'):
             # 构建 cjpeg 命令
-            cjpeg_command = ['cjpegli', input_file, output_file, '-q', '90']
+            cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90']
             # 调用 cjpeg 命令
-            subprocess.run(cjpeg_command, check=True)
-            # print(f"Converted {input_file} to {output_file}")
+            subprocess.run(cjpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 使用 exiftool 添加 XMP 元数据
-            add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', output_file]
-            subprocess.run(add_xmp_command, check=True)
-            # print(f"Added XMP metadata to {output_file}")
+            add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
+            subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif extension in ('.png', '.bmp'):
             # 构建 cwebp 命令
-            cwebp_command = ['cwebp', '-q', '50', '-lossless', '-sharp_yuv', input_file, '-o', output_file]
+            cwebp_command = ['cwebp', '-q', '50', '-lossless', '-sharp_yuv', input_file, '-o', temp_output_file]
             # 调用 cwebp 命令
-            subprocess.run(cwebp_command, check=True)
-            # print(f"Converted {input_file} to {output_file}")
+            subprocess.run(cwebp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 使用 exiftool 添加 XMP 元数据
-            add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', output_file]
-            subprocess.run(add_xmp_command, check=True)
-            # print(f"Added XMP metadata to {output_file}")
+            add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
+            subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
-            # 其他类型文件，直接复制到输出文件夹
-            shutil.copy2(input_file, output_file)
-            # print(f"Copied {input_file} to {output_file}")
-    #
+            # 其他类型文件，直接复制到临时文件
+            shutil.copy2(input_file, temp_output_file)
+
+        # 将临时文件重命名为最终文件
+        os.rename(temp_output_file, output_file)
+
     except (subprocess.CalledProcessError, IOError) as e:
-        print(f"Error processing {input_file}: {e}")
+        if os.path.exists(temp_output_file):
+            os.remove(temp_output_file)
         with open(error_log_file, 'a', encoding='utf-8') as log:
             log.write(f"Error processing {input_file}: {e}\n")
 
