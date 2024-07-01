@@ -108,7 +108,8 @@ def process_sfv_file(svf_file_apath):
                 else:
                     print(f"文件 '{filename}' 的CRC32值验证未通过")
             else:
-                print(f"文件 '{line}' 不存在")
+                pass
+                # print(f"文件 '{line}' 不存在")
 
     if len(files_only_set) > 0:
         with open(svf_file_apath, 'a', encoding='utf-8') as svf:
