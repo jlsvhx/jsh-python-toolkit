@@ -5,16 +5,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 
 # 定义输入和输出文件夹
-input_folder = r'E:\0_Immortal\IMMO-04 Pics\三次元 Model'
-output_folder = r'D:\Work\convert\cache\三次元 Model'
-error_log_file = r'D:\Work\convert\error_log.txt'
-
+input_folder = r'C:\Users\jshfs\Pictures'
+output_folder = r'E:\experiment\cache'
+error_log_file = r'E:\experiment\cache\error_log.txt'
 
 # 是否启用 avifenc 转换
 enable_avif_conversion = True  # 设置为 True 启用，False 禁用
 
+
 # 定义处理单个文件的函数
 def process_file(input_file, output_file, extension):
+    if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
+        output_file = os.path.splitext(output_file)[0] + '.avif'
+
     temp_output_file = output_file + '.tmp'
 
     # 删除可能存在的临时文件
@@ -24,14 +27,11 @@ def process_file(input_file, output_file, extension):
     try:
         if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
             # 构建 avifenc 命令
-            avif_output_file = os.path.splitext(output_file)[0] + '.avif'
             avifenc_command = [
                 'avifenc', '-c', 'aom', '-s', '4', '-j', '8', '-d', '10', '-y', '444', '--min', '1', '--max', '63',
-                '-a', 'end-usage=q', '-a', 'cq-level=15', '-a', 'tune=ssim', input_file, temp_output_file
+                '-a', 'end-usage=q', '-a', 'cq-level=20', '-a', 'tune=ssim', input_file, temp_output_file
             ]
             subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            # 只有当 avifenc 成功时，才重命名为最终文件
-            os.rename(temp_output_file, avif_output_file)
         elif extension in ('.jpg', '.jpeg'):
             # 构建 cjpeg 命令
             cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90']
@@ -39,7 +39,6 @@ def process_file(input_file, output_file, extension):
             # 使用 exiftool 添加 XMP 元数据
             add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
             subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            os.rename(temp_output_file, output_file)
         elif extension in ('.png', '.bmp'):
             # 构建 cwebp 命令
             cwebp_command = ['cwebp', '-q', '50', '-lossless', '-sharp_yuv', input_file, '-o', temp_output_file]
@@ -47,10 +46,11 @@ def process_file(input_file, output_file, extension):
             # 使用 exiftool 添加 XMP 元数据
             add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
             subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            os.rename(temp_output_file, output_file)
         else:
             shutil.copy2(input_file, temp_output_file)
-            os.rename(temp_output_file, output_file)
+
+        # 将临时文件重命名为最终文件
+        os.rename(temp_output_file, output_file)
     except (subprocess.CalledProcessError, IOError) as e:
         if os.path.exists(temp_output_file):
             os.remove(temp_output_file)
@@ -74,10 +74,13 @@ def convert_images(input_dir, output_dir):
                 if extension in ('.jpg', '.jpeg', '.png', '.bmp'):
                     relative_path = os.path.relpath(input_file, input_dir)
                     output_file = os.path.join(output_dir, relative_path)
-                    if extension in ('.png', '.bmp'):
-                        output_file = os.path.splitext(output_file)[0] + '.webp'
+                    if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
+                        output_file = os.path.splitext(output_file)[0] + '.avif'
                     else:
-                        output_file = output_file[:-len(extension)] + extension
+                        if extension in ('.png', '.bmp'):
+                            output_file = os.path.splitext(output_file)[0] + '.webp'
+                        else:
+                            output_file = output_file[:-len(extension)] + extension
 
                     os.makedirs(os.path.dirname(output_file), exist_ok=True)
                     if not os.path.exists(output_file):
@@ -102,6 +105,7 @@ def convert_images(input_dir, output_dir):
     # 最后打印完成信息
     print(f"\rProcessed {processed_count} files out of {total_files} total files")
     sys.stdout.flush()
+
 
 # 执行转换或复制
 convert_images(input_folder, output_folder)
