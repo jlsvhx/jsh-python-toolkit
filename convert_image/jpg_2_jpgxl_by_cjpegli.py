@@ -21,7 +21,7 @@ def process_file(input_file, output_file, extension):
     try:
         if extension in ('.jpg', '.jpeg'):
             # 构建 cjpeg 命令
-            cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90']
+            cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90', '--chroma_subsampling=444']
             # 调用 cjpeg 命令
             subprocess.run(cjpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 使用 exiftool 添加 XMP 元数据
