@@ -27,7 +27,7 @@ def process_file(input_file, output_file, extension):
             avif_output_file = os.path.splitext(output_file)[0] + '.avif'
             avifenc_command = [
                 'avifenc', '-c', 'aom', '-s', '4', '-j', '8', '-d', '10', '-y', '444', '--min', '1', '--max', '63',
-                '-a', 'end-usage=q', '-a', 'cq-level=20', '-a', 'tune=ssim', input_file, temp_output_file
+                '-a', 'end-usage=q', '-a', 'cq-level=15', '-a', 'tune=ssim', input_file, temp_output_file
             ]
             subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 只有当 avifenc 成功时，才重命名为最终文件
