@@ -10,6 +10,9 @@ output_folder = r'D:\Work\convert\cache\三次元 Model'
 error_log_file = r'D:\Work\convert\error_log.txt'
 
 
+# 是否启用 avifenc 转换
+enable_avif_conversion = True  # 设置为 True 启用，False 禁用
+
 # 定义处理单个文件的函数
 def process_file(input_file, output_file, extension):
     temp_output_file = output_file + '.tmp'
@@ -19,29 +22,35 @@ def process_file(input_file, output_file, extension):
         os.remove(temp_output_file)
 
     try:
-        if extension in ('.jpg', '.jpeg'):
+        if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
+            # 构建 avifenc 命令
+            avif_output_file = os.path.splitext(output_file)[0] + '.avif'
+            avifenc_command = [
+                'avifenc', '-c', 'aom', '-s', '4', '-j', '8', '-d', '10', '-y', '444', '--min', '1', '--max', '63',
+                '-a', 'end-usage=q', '-a', 'cq-level=20', '-a', 'tune=ssim', input_file, temp_output_file
+            ]
+            subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # 只有当 avifenc 成功时，才重命名为最终文件
+            os.rename(temp_output_file, avif_output_file)
+        elif extension in ('.jpg', '.jpeg'):
             # 构建 cjpeg 命令
-            cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90', '--chroma_subsampling=444']
-            # 调用 cjpeg 命令
+            cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90']
             subprocess.run(cjpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 使用 exiftool 添加 XMP 元数据
             add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
             subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            os.rename(temp_output_file, output_file)
         elif extension in ('.png', '.bmp'):
             # 构建 cwebp 命令
             cwebp_command = ['cwebp', '-q', '50', '-lossless', '-sharp_yuv', input_file, '-o', temp_output_file]
-            # 调用 cwebp 命令
             subprocess.run(cwebp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             # 使用 exiftool 添加 XMP 元数据
             add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
             subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            os.rename(temp_output_file, output_file)
         else:
-            # 其他类型文件，直接复制到临时文件
             shutil.copy2(input_file, temp_output_file)
-
-        # 将临时文件重命名为最终文件
-        os.rename(temp_output_file, output_file)
-
+            os.rename(temp_output_file, output_file)
     except (subprocess.CalledProcessError, IOError) as e:
         if os.path.exists(temp_output_file):
             os.remove(temp_output_file)
@@ -93,7 +102,6 @@ def convert_images(input_dir, output_dir):
     # 最后打印完成信息
     print(f"\rProcessed {processed_count} files out of {total_files} total files")
     sys.stdout.flush()
-
 
 # 执行转换或复制
 convert_images(input_folder, output_folder)
