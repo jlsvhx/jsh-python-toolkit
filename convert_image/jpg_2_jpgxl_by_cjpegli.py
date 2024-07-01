@@ -5,8 +5,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 
 # 定义输入和输出文件夹
-input_folder = r'C:\Users\jshfs\Pictures'
-output_folder = r'E:\experiment\cache'
+input_folder = r'E:\0_Immortal\IMMO-04 Pics\2次元 角色'
+output_folder = r'D:\Work\convert\cache\avif2次元角色4'
 error_log_file = r'E:\experiment\cache\error_log.txt'
 
 # 是否启用 avifenc 转换
@@ -28,8 +28,19 @@ def process_file(input_file, output_file, extension):
         if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
             # 构建 avifenc 命令
             avifenc_command = [
-                'avifenc', '-c', 'aom', '-s', '4', '-j', '8', '-d', '10', '-y', '444', '--min', '1', '--max', '63',
-                '-a', 'end-usage=q', '-a', 'cq-level=20', '-a', 'tune=ssim', input_file, temp_output_file
+                'avifenc',
+                '-c', 'aom',
+                '-s', '6',
+                '-j', '8',
+                '-d', '10',
+                '-y', '444',
+                '--min', '0',
+                '--max', '63',
+                '-a', 'end-usage=q',
+                '-a', 'deltaq-mode=3',
+                '-a', 'sharpness=2',
+                '-a', 'cq-level=18',
+                '-a', 'tune=ssim', input_file, temp_output_file
             ]
             subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif extension in ('.jpg', '.jpeg'):
@@ -64,7 +75,7 @@ def convert_images(input_dir, output_dir):
     processed_count = 0
     total_files = sum(len(files) for _, _, files in os.walk(input_dir))
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=2) as executor:
         for root, dirs, files in os.walk(input_dir):
             for filename in files:
                 input_file = os.path.join(root, filename)
