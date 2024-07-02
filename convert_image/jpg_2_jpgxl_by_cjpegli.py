@@ -5,9 +5,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
 
 # 定义输入和输出文件夹
-input_folder = r'E:\0_Immortal\IMMO-04 Pics\2次元 角色'
-output_folder = r'D:\Work\convert\cache\avif2次元角色4'
-error_log_file = r'E:\experiment\cache\error_log.txt'
+input_folder = r"F:\0_Immortal\IMMO-04 Pics\三次元 Model"
+output_folder = r'F:\Cache\3M'
+error_log_file = r'F:\Cache\error_log.txt'
 
 # 是否启用 avifenc 转换
 enable_avif_conversion = True  # 设置为 True 启用，False 禁用
@@ -26,23 +26,47 @@ def process_file(input_file, output_file, extension):
 
     try:
         if enable_avif_conversion and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
-            # 构建 avifenc 命令
-            avifenc_command = [
-                'avifenc',
-                '-c', 'aom',
-                '-s', '6',
-                '-j', '8',
-                '-d', '10',
-                '-y', '444',
-                '--min', '0',
-                '--max', '63',
-                '-a', 'end-usage=q',
-                '-a', 'deltaq-mode=3',
-                '-a', 'sharpness=2',
-                '-a', 'cq-level=18',
-                '-a', 'tune=ssim', input_file, temp_output_file
-            ]
-            subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            try:
+                # 构建 avifenc 命令
+                avifenc_command = [
+                    'avifenc',
+                    '-c', 'aom',
+                    '-s', '6',
+                    '-j', '8',
+                    '-d', '10',
+                    '-y', '444',
+                    '--min', '0',
+                    '--max', '63',
+                    '-a', 'end-usage=q',
+                    '-a', 'deltaq-mode=3',
+                    '-a', 'sharpness=2',
+                    '-a', 'cq-level=18',
+                    '-a', 'tune=ssim', input_file, temp_output_file
+                ]
+                subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except (subprocess.CalledProcessError, IOError) as e:
+                add_xmp_command = ['exiftool', "-all=", input_file]
+                subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # 构建 avifenc 命令
+                avifenc_command = [
+                    'avifenc',
+                    '-c', 'aom',
+                    '-s', '6',
+                    '-j', '8',
+                    '-d', '10',
+                    '-y', '444',
+                    '--min', '0',
+                    '--max', '63',
+                    '-a', 'end-usage=q',
+                    '-a', 'deltaq-mode=3',
+                    '-a', 'sharpness=2',
+                    '-a', 'cq-level=18',
+                    '-a', 'tune=ssim', input_file, temp_output_file
+                ]
+                subprocess.run(avifenc_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # 使用 exiftool 添加 XMP 元数据
+            add_xmp_command = ['exiftool', '-overwrite_original', '-xmp:description=compressed', temp_output_file]
+            subprocess.run(add_xmp_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif extension in ('.jpg', '.jpeg'):
             # 构建 cjpeg 命令
             cjpeg_command = ['cjpegli', input_file, temp_output_file, '-q', '90']
@@ -62,11 +86,21 @@ def process_file(input_file, output_file, extension):
 
         # 将临时文件重命名为最终文件
         os.rename(temp_output_file, output_file)
-    except (subprocess.CalledProcessError, IOError) as e:
+
+    except subprocess.CalledProcessError as e:
         if os.path.exists(temp_output_file):
             os.remove(temp_output_file)
         with open(error_log_file, 'a', encoding='utf-8') as log:
-            log.write(f"Error processing {input_file}: {e}\n")
+            print(f"CalledProcessError processing {input_file}: {e}")
+            log.write(f"CalledProcessError processing {input_file}: {e}\n")
+
+    except IOError as e:
+        if os.path.exists(temp_output_file):
+            os.remove(temp_output_file)
+        with open(error_log_file, 'a', encoding='utf-8') as log:
+            print(f"IOError processing {input_file}: {e}")
+            log.write(f"IOError processing {input_file}: {e}\n")
+
 
 
 # 遍历文件夹函数
@@ -75,7 +109,7 @@ def convert_images(input_dir, output_dir):
     processed_count = 0
     total_files = sum(len(files) for _, _, files in os.walk(input_dir))
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         for root, dirs, files in os.walk(input_dir):
             for filename in files:
                 input_file = os.path.join(root, filename)
@@ -96,26 +130,30 @@ def convert_images(input_dir, output_dir):
                     os.makedirs(os.path.dirname(output_file), exist_ok=True)
                     if not os.path.exists(output_file):
                         tasks.append(executor.submit(process_file, input_file, output_file, extension))
+                    else:
+                        processed_count += 1
                 else:
                     relative_path = os.path.relpath(input_file, input_dir)
                     output_file = os.path.join(output_dir, relative_path)
                     os.makedirs(os.path.dirname(output_file), exist_ok=True)
                     if not os.path.exists(output_file):
                         tasks.append(executor.submit(process_file, input_file, output_file, extension))
+                    else:
+                        processed_count += 1
 
         for future in as_completed(tasks):
             try:
                 future.result()
                 processed_count += 1
                 if processed_count % 10 == 0:
-                    print(f"\rProcessed {processed_count} files out of {total_files} total files", end='', flush=True)
-                    sys.stdout.flush()
+                    print(f"Processed {processed_count} files out of {total_files} total files")
+                    # sys.stdout.flush()
             except Exception as e:
                 continue
 
     # 最后打印完成信息
-    print(f"\rProcessed {processed_count} files out of {total_files} total files")
-    sys.stdout.flush()
+    print(f"Processed {processed_count} files out of {total_files} total file\n")
+    # sys.stdout.flush()
 
 
 # 执行转换或复制
