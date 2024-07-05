@@ -6,14 +6,14 @@ import sys
 import time
 
 # 定义输入和输出文件夹
-input_folder = r"F:\0_Immortal\IMMO-04 Pics\3次元Model"
-output_folder = r'F:\Cache\3M'
+input_folder = r"F:\0_Immortal\IMMO-04 Pics\Defaultz"
+output_folder = r'F:\Cache\Defaultz'
 error_log_file = r'F:\Cache\error_log.txt'
 
 # 是否启用 avifenc 转换
 ENABLE_AVIF_CONVERSION = True  # 设置为 True 启用，False 禁用
 # 线程池最大线程数
-THREAD_POOL_MAX_WORKERS = 12
+THREAD_POOL_MAX_WORKERS = 6
 
 
 # 定义处理单个文件的函数
@@ -43,7 +43,7 @@ def process_file(input_file, output_file, extension):
                 '-d', '10',
                 '-y', '444',
                 '--min', '0',
-                '--max', '40',
+                '--max', '60',
                 '-a', 'end-usage=q',
                 '-a', 'deltaq-mode=3',
                 '-a', 'sharpness=2',
@@ -106,7 +106,7 @@ def convert_images(input_dir, output_dir):
                 _, extension = os.path.splitext(filename)
                 extension = extension.lower()
 
-                if extension in ('.jpg', '.jpeg', '.png'):
+                if extension in ('.jpg', '.jpeg', '.png', '.bmp'):
                     relative_path = os.path.relpath(input_file, input_dir)
                     output_file = os.path.join(output_dir, relative_path)
                     if ENABLE_AVIF_CONVERSION and extension in ('.jpg', '.jpeg', '.png', '.bmp'):
