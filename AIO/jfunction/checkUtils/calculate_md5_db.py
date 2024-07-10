@@ -119,7 +119,7 @@ def verify_md5_in_folder(main_directory, thread_count=4):
                 result = cursor.fetchone()
 
                 if result is None:
-                    result_queue.put((file_path, False, "未找到对应的MD5记录"))
+                    result_queue.put((file_path, True, "未找到对应的MD5记录，已添加"))
                     cursor.execute('INSERT INTO files_md5 (file_path, md5, modification_time) VALUES (?, ?, ?)',
                                    (relative_path, current_md5, current_mod_time))
                     conn.commit()
