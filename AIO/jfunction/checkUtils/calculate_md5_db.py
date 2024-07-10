@@ -154,10 +154,12 @@ def verify_md5_in_folder(main_directory, thread_count=4):
     while not result_queue.empty():
         file_path, success, message = result_queue.get()
         if success:
-            print(f"文件 {file_path} 验证成功: {message}")
+            # print(f"文件 {file_path} 验证成功: {message}")
             pass
         else:
             print(f"文件 {file_path} 验证失败: {message}")
+
+    print("\n**MD5计算和验证任务完成**\n")
 
 
 # 通过文件浏览器选择文件夹
