@@ -2,15 +2,17 @@ import os.path
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
+# pyinstaller -p E:\Project\jsh_projcet\jsh-python-toolkit\AIO -D -w .\StartAIO2.py
 
 from PyQt5.QtCore import QTimer, Qt, QUrl, QDir, QTime, pyqtSignal, QThread
 from PyQt5.QtGui import QFont, QDesktopServices
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileSystemModel, QHeaderView, QMessageBox, QFileDialog, \
     QStatusBar, QMenu, QAction, QLCDNumber
 
+from multiprocessing import Process, freeze_support
+
 from ui import Ui_MainWindow
 from jfunction import checkUtils, compressUtils, folderUtils
-
 
 
 class WorkerThread(QThread):
@@ -263,8 +265,11 @@ class MyWindow(Ui_MainWindow):
         print("Thread finished")
 
 
+#  打包命令 pyinstaller -p E:\Project\jsh_projcet\jsh-python-toolkit\AIO -D .\StartAIO2.py
 
 if __name__ == '__main__':
+    # 避免打包后运行时会出现多个窗口的bug https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
+    freeze_support()
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
